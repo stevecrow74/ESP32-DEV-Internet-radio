@@ -1,0 +1,12 @@
+[
+  { "name": "Rewind", "url": "http://ingest4.cdnstream1.com:7080/2551_128.mp3" },
+  { "name": "FIP", "url": "https://icecast.radiofrance.fr/fip-hifi.aac" },
+  { "name": "Radio Paradise", "url": "http://stream.radioparadise.com/mp3-192" },
+  { "name": "SomaFM - Groove Salad", "url": "http://ice1.somafm.com/groovesalad-128-mp3" },
+  { "name": "SomaFM - Secret Agent", "url": "http://ice1.somafm.com/secretagent-128-mp3" },
+  { "name": "SomaFM - Jazz24", "url": "http://ice1.somafm.com/jazz24-128-mp3" },
+  { "name": "NPR (example)", "url": "https://npr-ice.stream.publicradio.org/npr.mp3" },
+  { "name": "KCRW", "url": "http://kcrw.stream.publicradio.org/kcrw_192k_mp3" },
+  { "name": "Classic FM (example)", "url": "http://media-ice.musicradio.com/ClassicFMMP3" },
+  { "name": "Radio Example", "url": "http://stream.example.com/stream.mp3" }
+]

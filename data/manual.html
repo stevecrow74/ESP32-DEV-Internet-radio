@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ESP32 Radio - Manual</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 16px; max-width: 960px; line-height: 1.45; }
+      h1, h2, h3 { margin-top: 20px; }
+      .card { padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 16px; }
+      code { background: #f2f2f2; padding: 1px 4px; border-radius: 4px; }
+      ul { padding-left: 20px; }
+      li { margin: 4px 0; }
+      .muted { color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>ESP32 Smart Radio V2 - User Manual</h1>
+      <p class="muted">Web version of the manual. Use this page for quick setup and daily operation.</p>
+    </div>
+
+    <div class="card">
+      <h2>1. Quick Start</h2>
+      <ol>
+        <li>Power on the radio.</li>
+        <li>Wait for startup and Wi-Fi connection.</li>
+        <li>Use the right encoder to change station and widgets.</li>
+        <li>Open <code>http://DEVICE_IP/</code> for Web UI management.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>2. Encoder Controls</h2>
+      <h3>Left Encoder (Volume)</h3>
+      <ul>
+        <li>Rotate: Volume up/down</li>
+        <li>Press: Mute/unmute</li>
+      </ul>
+      <h3>Right Encoder (Station/Widgets)</h3>
+      <ul>
+        <li>Rotate: Next/previous favourite station (normal mode)</li>
+        <li>Press: Next widget</li>
+      </ul>
+      <p>Main station browsing uses your favourites list.</p>
+      <p>Startup default is Rewind when present in favourites.</p>
+      <h3>In Favourites Widget</h3>
+      <ul>
+        <li>Rotate: Move selection</li>
+        <li>Short press: Play selected favourite</li>
+        <li>Long press (~5s): Delete selected favourite</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3. Widgets</h2>
+      <ul>
+        <li>Clock</li>
+        <li>ADS-B</li>
+        <li>Weather</li>
+        <li>Tides</li>
+        <li>Audio</li>
+        <li>Favourites</li>
+      </ul>
+      <p>Widgets auto-cycle every ~10 seconds.</p>
+      <p>Favourites is excluded from auto-cycle and available by manual widget switching.</p>
+    </div>
+
+    <div class="card">
+      <h2>4. Web UI Pages</h2>
+      <ul>
+        <li><code>/</code> Home</li>
+        <li><code>/favourites</code> Manage favourite stations</li>
+        <li><code>/adsb</code> ADS-B feed and range settings</li>
+        <li><code>/tides</code> Tides location and refresh settings</li>
+        <li><code>/network</code> Wi-Fi join, saved credentials, AP mode</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>5. Defaults</h2>
+      <ul>
+        <li>Weather area: Clarinbridge</li>
+        <li>ADS-B reference area: Clarinbridge</li>
+        <li>Tides label: Galway</li>
+        <li>Timezone: Irish time (DST aware)</li>
+      </ul>
+      <p>ADS-B and tides settings can be changed in Web UI and are saved to SPIFFS.</p>
+    </div>
+
+    <div class="card">
+      <h2>6. Network and AP Mode</h2>
+      <ul>
+        <li>Use <code>/network</code> to scan and connect to Wi-Fi.</li>
+        <li>Save SSID/password entries for quick reconnect.</li>
+        <li>AP mode SSID: <code>ESP32-Radio-AP</code></li>
+        <li>AP mode IP: <code>192.168.2.1</code></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>7. Troubleshooting</h2>
+      <ul>
+        <li>No audio: check mute, volume, and stream URL.</li>
+        <li>No Web UI: confirm device IP and same network.</li>
+        <li>No Wi-Fi: use AP mode and open <code>192.168.2.1</code>.</li>
+        <li>Bad ADS-B/Tides data: verify settings and save again.</li>
+      </ul>
+    </div>
+  </body>
+</html>
