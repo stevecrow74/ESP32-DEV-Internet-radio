@@ -12,6 +12,7 @@
 #include "widget_audio.h"
 #include "widget_favourites.h"
 #include "widget_tides.h"
+#include "widget_system.h"
 
 #include "widget_weather.h"
 
@@ -27,7 +28,7 @@ static WidgetID nextAutoCycleWidget(WidgetID from)
 {
     WidgetID next = static_cast<WidgetID>((from + 1) % MAX_WIDGETS);
 
-    // Keep favourites out of timed auto-cycle; it remains available via manual switching.
+    // Keep favourites and system info out of timed auto-cycle; they remain available via manual switching.
     if (next == WIDGET_SYSTEM)
         next = static_cast<WidgetID>((next + 1) % MAX_WIDGETS);
 
@@ -53,6 +54,7 @@ void widgetInit()
     audioWidgetInit();
     weatherWidgetInit();
     tidesWidgetInit();
+    systemWidgetInit();
     favWidgetInit();
 
     // initialize activity timer
@@ -104,7 +106,7 @@ void widgetLoop()
             break;
 
         case WIDGET_SYSTEM:
-            favWidgetLoop();
+            systemWidgetLoop();
             break;
 
         case WIDGET_AUDIO:
@@ -167,7 +169,7 @@ void widgetDraw()
             break;
 
         case WIDGET_SYSTEM:
-            favWidgetDraw();
+            systemWidgetDraw();
             break;
 
         default:

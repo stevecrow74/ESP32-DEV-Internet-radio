@@ -160,14 +160,14 @@ void drawStatusBar()
     tft.setCursor(42,5);
     tft.print(wifiConnected() ? signalLabelFromRssi(WiFi.RSSI()) : "....");
 
-    // SSID
+    // IP address
     tft.setTextColor(COLOUR_TEXT);
     tft.setCursor(80,5);
-    String ssid = wifiConnected() ? WiFi.SSID() : "offline";
-    if (ssid.length() > 9) {
-        ssid = ssid.substring(0, 9);
+    String statusText = wifiConnected() ? WiFi.localIP().toString() : "offline";
+    if (statusText.length() > 12) {
+        statusText = statusText.substring(0, 12);
     }
-    tft.print(ssid);
+    tft.print(statusText);
 
     // Clock
     tft.setCursor(196,5);
