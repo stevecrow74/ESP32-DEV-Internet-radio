@@ -19,8 +19,11 @@ static int lastVolumeCLK;
 
 static bool lastStationButton = HIGH;
 static bool lastMuteButton = HIGH;
+static bool muteButtonActiveLow = true;
 static unsigned long lastStationPress = 0;
 static unsigned long lastMutePress = 0;
+static unsigned long favouritesEnterTime = 0;
+static bool favouritesActive = false;
 
 const unsigned long BUTTON_DEBOUNCE = 200;
 
@@ -38,6 +41,10 @@ void encodersInit()
 
     lastVolumeCLK = digitalRead(ENC1_CLK);
     lastStationCLK = digitalRead(ENC2_CLK);
+
+    int initialMuteState = digitalRead(ENC1_SW);
+    muteButtonActiveLow = (initialMuteState == HIGH);
+    lastMuteButton = initialMuteState;
 }
 
 void encodersLoop()
@@ -88,12 +95,13 @@ void encodersLoop()
         {
             if (digitalRead(ENC2_DT) != clk)
             {
-                // Rotate right
-                if (currentWidget == WIDGET_SYSTEM) {
+                if (favouritesActive || currentWidget == WIDGET_SYSTEM)
+                {
                     widgetUserActivity();
                     favWidgetRotate(1);
-                } else {
-                    // Rotate selects next station
+                }
+                else
+                {
                     widgetUserActivity();
                     stationNext();
                     stationConnectCurrent();
@@ -101,12 +109,13 @@ void encodersLoop()
             }
             else
             {
-                // Rotate left
-                if (currentWidget == WIDGET_SYSTEM) {
+                if (favouritesActive || currentWidget == WIDGET_SYSTEM)
+                {
                     widgetUserActivity();
                     favWidgetRotate(-1);
-                } else {
-                    // Rotate selects previous station
+                }
+                else
+                {
                     widgetUserActivity();
                     stationPrevious();
                     stationConnectCurrent();
@@ -122,34 +131,50 @@ void encodersLoop()
     // ==================================================
 
     bool stationButton = digitalRead(ENC2_SW);
+    unsigned long now = millis();
 
-    // When in favourites widget, handle press/release differently to allow select vs delete
-    if (lastStationButton == HIGH && stationButton == LOW && millis() - lastStationPress > BUTTON_DEBOUNCE)
+    if (lastStationButton == HIGH && stationButton == LOW && now - lastStationPress > BUTTON_DEBOUNCE)
     {
-        lastStationPress = millis();
+        lastStationPress = now;
+        widgetUserActivity();
+    }
 
-        // For non-favourites, short press cycles widgets
-        if (currentWidget != WIDGET_SYSTEM) {
+    if (lastStationButton == LOW && stationButton == HIGH && now - lastStationPress > BUTTON_DEBOUNCE)
+    {
+        unsigned long held = now - lastStationPress;
+
+        if (held >= 3000)
+        {
+            favouritesActive = true;
+            currentWidget = WIDGET_SYSTEM;
+            widgetDraw();
             widgetUserActivity();
-            widgetNext();
+            favouritesEnterTime = now;
+        }
+        else if (held >= 0)
+        {
+            if (favouritesActive || currentWidget == WIDGET_SYSTEM)
+            {
+                widgetUserActivity();
+                favWidgetSelect();
+                favouritesActive = false;
+                currentWidget = WIDGET_AUDIO;
+                widgetDraw();
+            }
+            else
+            {
+                widgetUserActivity();
+                widgetNext();
+            }
         }
     }
 
-    // Detect release for favourites long-press detection
-    if (lastStationButton == LOW && stationButton == HIGH && millis() - lastStationPress > BUTTON_DEBOUNCE)
+    if (favouritesActive && now - favouritesEnterTime > 10000)
     {
-        unsigned long held = millis() - lastStationPress;
-
-        if (currentWidget == WIDGET_SYSTEM) {
-            widgetUserActivity();
-            if (held > 5000) {
-                // long press (5s) -> delete
-                favWidgetDeleteSelected();
-            } else {
-                // short press -> select/play
-                favWidgetSelect();
-            }
-        }
+        favouritesActive = false;
+        currentWidget = WIDGET_AUDIO;
+        widgetDraw();
+        widgetUserActivity();
     }
 
     lastStationButton = stationButton;
@@ -159,17 +184,26 @@ void encodersLoop()
     // ==================================================
 
     bool muteButton = digitalRead(ENC1_SW);
+    bool mutePressed = false;
 
-    if (lastMuteButton == HIGH &&
-         muteButton == LOW &&
-         millis() - lastMutePress > BUTTON_DEBOUNCE)
-{
-         lastMutePress = millis();
+    if (muteButton != lastMuteButton && millis() - lastMutePress > BUTTON_DEBOUNCE)
+    {
+        if (muteButtonActiveLow)
+        {
+            mutePressed = (muteButton == LOW && lastMuteButton == HIGH);
+        }
+        else
+        {
+            mutePressed = (muteButton == HIGH && lastMuteButton == LOW);
+        }
 
-         Serial.println("Mute");
+        if (mutePressed)
+        {
+            lastMutePress = millis();
+            Serial.println("Mute");
+            audioToggleMute();
+        }
+    }
 
-         audioToggleMute();
-}
-
-lastMuteButton = muteButton;
+    lastMuteButton = muteButton;
 }

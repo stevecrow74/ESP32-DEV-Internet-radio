@@ -10,6 +10,7 @@
 #include "adsb_config.h"
 #include "saved_networks.h"
 #include "tides_config.h"
+#include "audio_buffer_config.h"
 
 static WebServer *serverPtr = nullptr;
 #define server (*serverPtr)
@@ -67,6 +68,9 @@ static void handleNetworkConnect()
   String ssid = server.arg("ssid");
   String password = server.arg("password");
 
+  ssid.trim();
+  password.trim();
+
   if (ssid.length() == 0)
   {
     setNetworkStatus("Missing SSID");
@@ -74,6 +78,8 @@ static void handleNetworkConnect()
     server.send(303, "text/plain", "Missing SSID");
     return;
   }
+
+  savedNetworksAdd(ssid, password);
 
   if (connectToWifi(ssid, password))
   {
@@ -95,8 +101,28 @@ static void handleNetworkConnect()
 
   static void handleSavedNetworkAdd()
   {
-    String ssid = server.arg("ssid");
-    String password = server.arg("password");
+    String ssid;
+    String password;
+
+    if (server.hasArg("plain"))
+    {
+      String body = server.arg("plain");
+      JsonDocument doc;
+      DeserializationError err = deserializeJson(doc, body);
+      if (!err)
+      {
+        ssid = doc["ssid"].as<const char *>() ? String(doc["ssid"].as<const char *>()) : String("");
+        password = doc["password"].as<const char *>() ? String(doc["password"].as<const char *>()) : String("");
+      }
+    }
+
+    if (ssid.length() == 0 && server.hasArg("ssid"))
+      ssid = server.arg("ssid");
+    if (password.length() == 0 && server.hasArg("password"))
+      password = server.arg("password");
+
+    ssid.trim();
+    password.trim();
 
     if (!savedNetworksAdd(ssid, password))
     {
@@ -284,6 +310,21 @@ static void handleAdsbSave()
     server.send(303, "text/plain", "Saved");
   }
 
+static void handleAudioBufferSave()
+{
+    int ramBytes = server.arg("ramBytes").toInt();
+    int psramBytes = server.arg("psramBytes").toInt();
+
+    if (ramBytes < 0)
+        ramBytes = -1;
+    if (psramBytes < 0)
+        psramBytes = -1;
+
+    audioBufferConfigUpdate(ramBytes, psramBytes);
+    server.sendHeader("Location", "/network");
+    server.send(303, "text/plain", "Saved");
+}
+
 void webuiInit()
 {
     if (!serverPtr)
@@ -303,6 +344,7 @@ void webuiInit()
     server.on("/api/favourites/play", HTTP_POST, handlePlayFav);
     server.on("/adsb", HTTP_POST, handleAdsbSave);
     server.on("/tides", HTTP_POST, handleTidesSave);
+    server.on("/audio-buffer", HTTP_POST, handleAudioBufferSave);
     server.on("/network/connect", HTTP_POST, handleNetworkConnect);
     server.on("/network/ap", HTTP_POST, handleNetworkApMode);
     server.on("/network/connect_saved", HTTP_POST, handleSavedNetworkConnect);
@@ -695,6 +737,13 @@ void webuiInit()
   loadSaved();
 </script>
 )rawliteral";
+
+        html += "<div class=\"card\"><h2>Audio Buffer</h2>";
+        html += "<form method=\"post\" action=\"/audio-buffer\">";
+        html += "<label>RAM buffer (bytes)</label><input name=\"ramBytes\" type=\"number\" min=\"-1\" value=\"" + String(audioBufferRamBytes()) + "\" />";
+        html += "<p><label>PSRAM buffer (bytes)</label><input name=\"psramBytes\" type=\"number\" min=\"-1\" value=\"" + String(audioBufferPsramBytes()) + "\" />";
+        html += "<p class=\"muted\">Use -1 to leave the library default unchanged. Changes take effect after reboot.</p>";
+        html += "<button type=\"submit\">Save Audio Buffer</button></form></div>";
 
         html += "<div class=\"card\"><h2>AP Mode</h2>";
         html += "<p>Start AP mode with static IP <strong>192.168.2.1</strong>.</p>";

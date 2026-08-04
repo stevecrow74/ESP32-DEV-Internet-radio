@@ -19,6 +19,7 @@ extern Adafruit_ST7789 tft;
 void displayInit();
 void displayLoop();
 void displayRefresh();
+void drawSplashScreen();
 
 // Screen sections
 

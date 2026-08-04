@@ -80,6 +80,25 @@ void displayInit()
     displayRefresh();
 }
 
+void drawSplashScreen()
+{
+    tft.fillScreen(COLOUR_BACKGROUND);
+
+    tft.setTextColor(COLOUR_TEXT);
+    tft.setTextSize(2);
+    tft.setCursor(35, 20);
+    tft.print("Internet Radio");
+
+    tft.setTextSize(2);
+    tft.setCursor(66, 40);
+    tft.print("V2.0");
+
+    tft.setTextSize(2);
+    tft.setTextColor(COLOUR_TEXT);
+    tft.setCursor(35, 60);
+    tft.print("By Stevecrow74");
+}
+
 void displayLoop()
 {
     // Keep top status bar live (time + network) once per second.

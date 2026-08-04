@@ -6,17 +6,14 @@
 static const char *FAV_FILE = "/favourites.json";
 
 static const char *DEFAULT_FAVS = R"json([
-  { "name": "Rewind", "url": "http://ingest4.cdnstream1.com:7080/2551_128.mp3" },
-  { "name": "FIP", "url": "https://icecast.radiofrance.fr/fip-hifi.aac" },
-  { "name": "Radio Paradise", "url": "http://stream.radioparadise.com/mp3-192" },
-  { "name": "SomaFM - Groove Salad", "url": "http://ice1.somafm.com/groovesalad-128-mp3" },
-  { "name": "SomaFM - Secret Agent", "url": "http://ice1.somafm.com/secretagent-128-mp3" },
-  { "name": "SomaFM - Jazz24", "url": "http://ice1.somafm.com/jazz24-128-mp3" },
-  { "name": "NPR (example)", "url": "https://npr-ice.stream.publicradio.org/npr.mp3" },
-  { "name": "KCRW", "url": "http://kcrw.stream.publicradio.org/kcrw_192k_mp3" },
-  { "name": "Classic FM (example)", "url": "http://media-ice.musicradio.com/ClassicFMMP3" },
-  { "name": "Radio Example", "url": "http://stream.example.com/stream.mp3" }
+  { "name": "Radio X", "url": "https://icecast.thisisdax.com/RadioXUK" },
+  { "name": "Zenith rock", "url": "http://91.189.64.188:3644/zenith128mp3" },
+  { "name": "Classic Hits", "url": "http://live-bauerie.sharp-stream.com/CLASSIC?ref=RF" },
+  { "name": "BoB FM", "url": "http://sirius.shoutca.st:8011/stream" },
+  { "name": "Velvet", "url": "http://stream.btsstream.com:8012/velvet.mp3" },
+  { "name": "Onic 80's", "url": "http://onic.dublin.live.stream.broadcasting.news/stream-80s?ref=RF" },
 ])json";
+
 
 static void ensureDefaultFavFile()
 {

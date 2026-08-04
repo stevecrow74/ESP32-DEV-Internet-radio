@@ -29,6 +29,7 @@ void setup()
     Serial.println("[BOOT] SPIFFS ready");
 
     displayInit();
+    drawSplashScreen();
     Serial.println("[BOOT] display ready");
 
     wifiConnect();
@@ -57,6 +58,7 @@ void setup()
     weatherUpdate();
     Serial.println("[BOOT] weather ready");
 
+    delay(5000);
     widgetDraw();
 
     Serial.println("System Ready");
