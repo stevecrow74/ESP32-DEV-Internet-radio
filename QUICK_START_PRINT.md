@@ -53,7 +53,7 @@ Main station browsing uses favourites. Startup defaults to Rewind when present.
 
 ### Configure Tides
 1. Open /tides
-2. Set location + coordinates + refresh
+2. Set location + coordinates + refresh + source URL
 3. Save
 
 ### Network Management
@@ -70,6 +70,7 @@ Main station browsing uses favourites. Startup defaults to Rewind when present.
 - Weather area: Clarinbridge
 - ADS-B reference area: Clarinbridge
 - Tides label: Galway
+- Tides source URL: https://www.tidetime.org/europe/ireland/galway.htm
 - Timezone: Irish time (with DST)
 
 ## If Something Fails

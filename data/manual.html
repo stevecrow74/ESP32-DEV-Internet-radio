@@ -72,7 +72,7 @@
         <li><code>/</code> Home</li>
         <li><code>/favourites</code> Manage favourite stations</li>
         <li><code>/adsb</code> ADS-B feed and range settings</li>
-        <li><code>/tides</code> Tides location and refresh settings</li>
+        <li><code>/tides</code> Tides location, coordinates, refresh, and source URL</li>
         <li><code>/network</code> Wi-Fi join, saved credentials, AP mode</li>
       </ul>
     </div>
@@ -83,9 +83,11 @@
         <li>Weather area: Clarinbridge</li>
         <li>ADS-B reference area: Clarinbridge</li>
         <li>Tides label: Galway</li>
+        <li>Tides source URL: https://www.tidetime.org/europe/ireland/galway.htm</li>
         <li>Timezone: Irish time (DST aware)</li>
       </ul>
       <p>ADS-B and tides settings can be changed in Web UI and are saved to SPIFFS.</p>
+      <p>Tides widget currently parses next high/low, trend and height from the configured source URL.</p>
     </div>
 
     <div class="card">

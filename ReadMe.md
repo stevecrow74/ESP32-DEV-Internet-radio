@@ -1,5 +1,18 @@
 # ESP32 Smart Radio V2 - User Manual
 
+# Hardware
+This project uses:
+-ESP32 Dev board
+- 2 rotary encoders
+- GMT020-02 ST7789 2" LCD
+- GY-PCM5102 I2S Stereo Board
+
+
+# User settings
+This build uses my own local settings, these can be changed in the Webui.
+
+
+
 ## 1. Overview
 ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls, audio streaming, and a built-in browser-based Web UI for management.
 

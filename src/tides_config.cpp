@@ -8,11 +8,13 @@
 #include "project_config.h"
 
 static const char *TIDES_CONFIG_FILE = "/tides_config.json";
+static const char *DEFAULT_TIDE_SOURCE_URL = "https://www.tidetime.org/europe/ireland/galway.htm";
 
 static char cfgLocation[64];
 static double cfgLatitude = LATITUDE;
 static double cfgLongitude = LONGITUDE;
 static uint16_t cfgRefreshMinutes = (uint16_t)(TIDE_UPDATE_MS / 60000UL);
+static char cfgSourceUrl[192];
 
 static void setDefaults()
 {
@@ -21,6 +23,8 @@ static void setDefaults()
     cfgLatitude = LATITUDE;
     cfgLongitude = LONGITUDE;
     cfgRefreshMinutes = (uint16_t)(TIDE_UPDATE_MS / 60000UL);
+    strncpy(cfgSourceUrl, DEFAULT_TIDE_SOURCE_URL, sizeof(cfgSourceUrl) - 1);
+    cfgSourceUrl[sizeof(cfgSourceUrl) - 1] = '\0';
 }
 
 static void saveConfig()
@@ -30,6 +34,7 @@ static void saveConfig()
     doc["latitude"] = cfgLatitude;
     doc["longitude"] = cfgLongitude;
     doc["refreshMinutes"] = cfgRefreshMinutes;
+    doc["sourceUrl"] = cfgSourceUrl;
 
     File f = SPIFFS.open(TIDES_CONFIG_FILE, FILE_WRITE);
     if (!f)
@@ -76,6 +81,10 @@ void tidesConfigInit()
     cfgLatitude = doc["latitude"] | LATITUDE;
     cfgLongitude = doc["longitude"] | LONGITUDE;
 
+    const char *url = doc["sourceUrl"] | DEFAULT_TIDE_SOURCE_URL;
+    strncpy(cfgSourceUrl, url, sizeof(cfgSourceUrl) - 1);
+    cfgSourceUrl[sizeof(cfgSourceUrl) - 1] = '\0';
+
     uint16_t mins = doc["refreshMinutes"] | (uint16_t)(TIDE_UPDATE_MS / 60000UL);
     if (mins < 1)
         mins = 1;
@@ -104,11 +113,17 @@ uint32_t tidesRefreshMs()
     return (uint32_t)cfgRefreshMinutes * 60000UL;
 }
 
+String tidesSourceUrl()
+{
+    return String(cfgSourceUrl);
+}
+
 void tidesConfigUpdate(
     const String &location,
     double latitude,
     double longitude,
-    uint16_t refreshMinutes)
+    uint16_t refreshMinutes,
+    const String &sourceUrl)
 {
     if (location.length())
     {
@@ -125,5 +140,12 @@ void tidesConfigUpdate(
         refreshMinutes = 720;
 
     cfgRefreshMinutes = refreshMinutes;
+
+    if (sourceUrl.length())
+    {
+        strncpy(cfgSourceUrl, sourceUrl.c_str(), sizeof(cfgSourceUrl) - 1);
+        cfgSourceUrl[sizeof(cfgSourceUrl) - 1] = '\0';
+    }
+
     saveConfig();
 }

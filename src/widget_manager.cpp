@@ -67,6 +67,9 @@ void widgetLoop()
 {
     unsigned long now = millis();
 
+    // Keep tide data refreshed in the background even when the Tides widget is not selected.
+    tidesWidgetLoop();
+
     // While manually selected, hold on the current widget for 20 seconds.
     if (holdSelectedUntil != 0)
     {
@@ -118,7 +121,6 @@ void widgetLoop()
             break;
 
         case WIDGET_TIDES:
-            tidesWidgetLoop();
             break;
 
         default:

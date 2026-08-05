@@ -7,11 +7,24 @@ static const char *FAV_FILE = "/favourites.json";
 
 static const char *DEFAULT_FAVS = R"json([
   { "name": "Radio X", "url": "https://icecast.thisisdax.com/RadioXUK" },
-  { "name": "Zenith rock", "url": "http://91.189.64.188:3644/zenith128mp3" },
+    { "name": "Zenith Rock", "url": "http://91.189.64.188:3644/zenith128mp3" },
   { "name": "Classic Hits", "url": "http://live-bauerie.sharp-stream.com/CLASSIC?ref=RF" },
+    { "name": "Classic FM", "url": "http://media-ice.musicradio.com/ClassicFMMP3" },
   { "name": "BoB FM", "url": "http://sirius.shoutca.st:8011/stream" },
+    { "name": "Onic Alt", "url": "http://onic.dublin.live.stream.broadcasting.news/stream-alternative-mobile?ref=RF" },
   { "name": "Velvet", "url": "http://stream.btsstream.com:8012/velvet.mp3" },
   { "name": "Onic 80's", "url": "http://onic.dublin.live.stream.broadcasting.news/stream-80s?ref=RF" },
+    { "name": "Darkwave Radio", "url": "http://77.249.39.15:8000/;" },
+    { "name": "Soma 80's", "url": "https://ice6.somafm.com/u80s-64-aac" },
+    { "name": "Soma Indie", "url": "https://ice6.somafm.com/indiepop-128-mp3" },
+    { "name": "Soma Doomed", "url": "https://ice5.somafm.com/doomed-128-mp3" },
+    { "name": "Soma 70's", "url": "https://ice5.somafm.com/seventies-128-mp3" },
+    { "name": "Mellow Mix", "url": "https://stream.radioparadise.com/mellow-320" },
+    { "name": "Rock Mix", "url": "https://stream.radioparadise.com/rock-320" },
+    { "name": "Rock Antenne Classic", "url": "https://stream.rockantenne.de/classic-perlen" },
+    { "name": "Rock Antenne Alternative", "url": "https://stream.rockantenne.de/alternative" },
+    { "name": "Rock Antenne Heavy Metal", "url": "https://stream.rockantenne.de/heavy-metal" },
+    { "name": "Planet Rock", "url": "https://media-ice.musicradio.com/PlanetRockMP3" }
 ])json";
 
 

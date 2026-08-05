@@ -51,13 +51,14 @@ Startup default is Rewind when present in favourites.
 
 ### Tides
 - Go to /tides
-- Set location, latitude, longitude, refresh interval
+- Set location, latitude, longitude, refresh interval, and source URL
 - Save config
 
 ## 6. Default Locations and Time
 - Weather default: Clarinbridge area
 - ADS-B default reference: Clarinbridge area
 - Tides default location label: Galway
+- Tides default source URL: https://www.tidetime.org/europe/ireland/galway.htm
 - Timezone: Irish time (with DST)
 
 ## 7. If Something Looks Wrong

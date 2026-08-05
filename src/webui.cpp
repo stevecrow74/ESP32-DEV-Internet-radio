@@ -301,11 +301,12 @@ static void handleAdsbSave()
     double latitude = server.arg("latitude").toDouble();
     double longitude = server.arg("longitude").toDouble();
     uint16_t refreshMinutes = (uint16_t)server.arg("refreshMinutes").toInt();
+    String sourceUrl = server.arg("sourceUrl");
 
     if (refreshMinutes == 0)
       refreshMinutes = (uint16_t)(tidesRefreshMs() / 60000UL);
 
-    tidesConfigUpdate(location, latitude, longitude, refreshMinutes);
+    tidesConfigUpdate(location, latitude, longitude, refreshMinutes, sourceUrl);
     server.sendHeader("Location", "/tides");
     server.send(303, "text/plain", "Saved");
   }
@@ -373,41 +374,88 @@ void webuiInit()
             html += renderNav();
             html += R"rawliteral(
     <div class="card">
-      <h2>ESP32 Smart Radio V2 Manual</h2>
+      <h2>ESP32 Smart Radio V2 - User Manual</h2>
       <p><strong>Quick Start:</strong> Power on, wait for Wi-Fi, then open this Web UI from your device IP.</p>
-      <p><strong>Note:</strong> Full manual file not found on SPIFFS (<code>/manual.html</code>), so this built-in quick manual is shown.</p>
+      <p><strong>Note:</strong> Full manual file not found on SPIFFS (<code>/manual.html</code>), so this built-in full manual is shown.</p>
     </div>
     <div class="card">
-      <h3>Controls</h3>
+      <h3>1. Quick Start</h3>
+      <ol>
+        <li>Power on the radio.</li>
+        <li>Wait for startup and Wi-Fi connection.</li>
+        <li>Use the right encoder to change station and widgets.</li>
+        <li>Open <code>http://DEVICE_IP/</code> for Web UI management.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>2. Encoder Controls</h3>
+      <h4>Left Encoder (Volume)</h4>
       <ul>
-        <li>Left encoder rotate: volume up/down</li>
-        <li>Left encoder press: mute/unmute</li>
-        <li>Right encoder rotate: next/previous station</li>
-        <li>Right encoder press: next widget</li>
+        <li>Rotate: Volume up/down</li>
+        <li>Press: Mute/unmute</li>
       </ul>
-      <p>In Favourites widget: rotate to select, short press to play, long press (~5s) to delete.</p>
+      <h4>Right Encoder (Station/Widgets)</h4>
+      <ul>
+        <li>Rotate: Next/previous favourite station</li>
+        <li>Press: Next widget</li>
+      </ul>
+      <p>Main station browsing uses your favourites list. Startup default is Rewind when present in favourites.</p>
+      <h4>In Favourites Widget</h4>
+      <ul>
+        <li>Rotate: Move selection</li>
+        <li>Short press: Play selected favourite</li>
+        <li>Long press (~5s): Delete selected favourite</li>
+      </ul>
     </div>
     <div class="card">
-      <h3>Web Pages</h3>
+      <h3>3. Widgets</h3>
+      <ul>
+        <li>Clock</li>
+        <li>ADS-B</li>
+        <li>Weather</li>
+        <li>Tides</li>
+        <li>Audio</li>
+        <li>Favourites</li>
+      </ul>
+      <p>Widgets auto-cycle every ~10 seconds. Favourites is excluded from auto-cycle and available by manual widget switching.</p>
+    </div>
+    <div class="card">
+      <h3>4. Web Pages</h3>
       <ul>
         <li><a href="/favourites">Favourites</a>: add, delete, play saved stations</li>
         <li><a href="/adsb">ADS-B Config</a>: set feed URLs and range</li>
-        <li><a href="/tides">Tides Config</a>: set location, coordinates, refresh</li>
+        <li><a href="/tides">Tides Config</a>: set location, coordinates, refresh, source URL</li>
         <li><a href="/network">Network</a>: join Wi-Fi, save credentials, AP mode</li>
       </ul>
     </div>
     <div class="card">
-      <h3>Defaults</h3>
+      <h3>5. Defaults</h3>
       <ul>
         <li>Weather area: Clarinbridge</li>
         <li>ADS-B reference area: Clarinbridge coordinates</li>
         <li>Tides label: Galway</li>
+        <li>Tides source URL: https://www.tidetime.org/europe/ireland/galway.htm</li>
         <li>Timezone: Irish time (with DST)</li>
+      </ul>
+      <p>Tides widget reads next high/low, trend and height from the configured source URL.</p>
+    </div>
+    <div class="card">
+      <h3>6. Network and AP Mode</h3>
+      <ul>
+        <li>Use <code>/network</code> to scan and connect to Wi-Fi.</li>
+        <li>Save SSID/password entries for quick reconnect.</li>
+        <li>AP mode SSID: <code>ESP32-Radio-AP</code></li>
+        <li>AP mode IP: <code>192.168.2.1</code></li>
       </ul>
     </div>
     <div class="card">
-      <h3>Enable Full Manual</h3>
-      <p>Upload filesystem data (including <code>data/manual.html</code>) to SPIFFS, then reload this page.</p>
+      <h3>7. Troubleshooting</h3>
+      <ul>
+        <li>No audio: check mute, volume, and stream URL.</li>
+        <li>No Web UI: confirm device IP and same network.</li>
+        <li>No Wi-Fi: use AP mode and open <code>192.168.2.1</code>.</li>
+        <li>Bad ADS-B/Tides data: verify settings and save again.</li>
+      </ul>
     </div>
   </body>
 </html>
@@ -436,7 +484,7 @@ void webuiInit()
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ESP32 Radio</title>
+    <title>Intenet Radio By stevecrow74</title>
     <style>
       body{font-family:Arial;margin:16px;max-width:900px}
       .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
@@ -581,7 +629,7 @@ void webuiInit()
 
     server.on("/tides", HTTP_GET, []() {
         String html;
-        html.reserve(2400);
+        html.reserve(2800);
         html += R"rawliteral(
 <!doctype html>
 <html>
@@ -614,7 +662,10 @@ void webuiInit()
         html += "<label>Refresh (minutes)</label><input name=\"refreshMinutes\" type=\"number\" min=\"1\" max=\"720\" value=\"";
         html += String(tidesRefreshMs() / 60000UL);
         html += "\" />";
-        html += "<div class=\"hint\">Used by the Tides widget to fetch sea level and estimate next high/low tide.</div>";
+        html += "<label>Source URL</label><input name=\"sourceUrl\" value=\"";
+        html += htmlEscape(tidesSourceUrl());
+        html += "\" />";
+        html += "<div class=\"hint\">Used by the Tides widget to fetch next high/low, trend and height data.</div>";
         html += "<button type=\"submit\">Save Tides Config</button></form></div></body></html>";
         server.send(200, "text/html", html);
     });
