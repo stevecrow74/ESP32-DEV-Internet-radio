@@ -5,6 +5,7 @@
 #include <SPIFFS.h>
 
 #include "webui.h"
+#include "audio_engine.h"
 #include "favourites.h"
 #include "station_manager.h"
 #include "adsb_config.h"
@@ -311,6 +312,37 @@ static void handleAdsbSave()
     server.send(303, "text/plain", "Saved");
   }
 
+static void handleVolGet()
+{
+    server.send(200, "text/plain", String(audioGetVolume()));
+}
+
+static void handleVolUp()
+{
+    uint8_t v = audioGetVolume();
+    if (v < 21) audioSetVolume(v + 1);
+    server.send(200, "text/plain", String(audioGetVolume()));
+}
+
+static void handleVolDown()
+{
+    uint8_t v = audioGetVolume();
+    if (v > 0) audioSetVolume(v - 1);
+    server.send(200, "text/plain", String(audioGetVolume()));
+}
+
+static void handleStationNext()
+{
+    stationNext();
+    server.send(200, "text/plain", "ok");
+}
+
+static void handleStationPrev()
+{
+    stationPrevious();
+    server.send(200, "text/plain", "ok");
+}
+
 static void handleAudioBufferSave()
 {
     int ramBytes = server.arg("ramBytes").toInt();
@@ -339,6 +371,11 @@ void webuiInit()
     tidesConfigInit();
     savedNetworksInit();
 
+    server.on("/api/vol", HTTP_GET, handleVolGet);
+    server.on("/api/vol/up", HTTP_POST, handleVolUp);
+    server.on("/api/vol/down", HTTP_POST, handleVolDown);
+    server.on("/api/station/next", HTTP_POST, handleStationNext);
+    server.on("/api/station/prev", HTTP_POST, handleStationPrev);
     server.on("/api/favourites", HTTP_GET, handleListFavs);
     server.on("/api/favourites", HTTP_POST, handleAddFav);
     server.on("/api/favourites", HTTP_DELETE, handleDeleteFav);
@@ -504,6 +541,28 @@ void webuiInit()
       <a href="/manual">Open Manual</a>
       <a href="/network">Open Network</a>
     </div>
+    <div class="card">
+      <h2>Controls</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button onclick="stationCmd('prev')">&#9664; Station</button>
+        <button onclick="stationCmd('next')">Station &#9654;</button>
+        <button onclick="volCmd('down')">Vol &minus;</button>
+        <button onclick="volCmd('up')">Vol +</button>
+        <span>Volume: <strong id="vol">--</strong></span>
+      </div>
+    </div>
+    <script>
+      async function volCmd(dir) {
+        const res = await fetch('/api/vol/' + dir, {method:'POST'});
+        document.getElementById('vol').textContent = await res.text();
+      }
+      async function stationCmd(dir) {
+        await fetch('/api/station/' + dir, {method:'POST'});
+      }
+      fetch('/api/vol').then(r=>r.text()).then(v=>{
+        document.getElementById('vol').textContent=v;
+      });
+    </script>
   </body>
 </html>
 )rawliteral";

@@ -18,7 +18,7 @@ constexpr char PROJECT_VERSION[] = "0.2.0";
 // Audio
 //------------------------------------------------------
 
-constexpr uint8_t DEFAULT_VOLUME = 5;
+constexpr uint8_t DEFAULT_VOLUME = 1;
 
 // Override the audio input buffer size. The library uses these values
 // for RAM and PSRAM-backed buffering respectively.
