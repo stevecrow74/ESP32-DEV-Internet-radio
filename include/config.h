@@ -66,7 +66,7 @@ constexpr uint8_t FONT_HUGE   = 4;
 // Audio
 //==================================================
 
-constexpr uint8_t MAX_VOLUME     = 21;
+constexpr uint8_t MAX_VOLUME     = 50;
 constexpr uint8_t MIN_VOLUME     = 0;
 
 //==================================================

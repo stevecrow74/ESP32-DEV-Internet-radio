@@ -6,6 +6,7 @@
 
 #include <Arduino.h>
 
+#include "config.h"
 #include "pins.h"
 #include "encoders.h"
 #include "station_manager.h"
@@ -68,7 +69,7 @@ void encodersLoop()
 
             if (digitalRead(ENC1_DT) != vclk)
             {
-                if (volume < 21)
+                if (volume < MAX_VOLUME)
                     volume++;
             }
             else

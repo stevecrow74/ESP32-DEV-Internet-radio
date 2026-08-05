@@ -56,8 +56,8 @@ void audioStop()
 
 void audioSetVolume(uint8_t v)
 {
-    if (v > 21)
-        v = 21;
+    if (v > MAX_VOLUME)
+        v = MAX_VOLUME;
 
     startupMuteActive = false;
     currentVolume = v;

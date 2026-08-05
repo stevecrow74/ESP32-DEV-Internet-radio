@@ -320,7 +320,7 @@ static void handleVolGet()
 static void handleVolUp()
 {
     uint8_t v = audioGetVolume();
-    if (v < 21) audioSetVolume(v + 1);
+    if (v < MAX_VOLUME) audioSetVolume(v + 1);
     server.send(200, "text/plain", String(audioGetVolume()));
 }
 
