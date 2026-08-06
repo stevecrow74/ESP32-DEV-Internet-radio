@@ -26,12 +26,12 @@ static String renderNav()
 {
     return R"nav(
 <nav style="margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #ddd">
-  <a href="/" style="margin-right:12px">Home</a>
-  <a href="/favourites" style="margin-right:12px">Favourites</a>
-  <a href="/adsb" style="margin-right:12px">ADS-B Config</a>
-  <a href="/tides" style="margin-right:12px">Tides Config</a>
-  <a href="/manual" style="margin-right:12px">Manual</a>
-  <a href="/network">Network</a>
+  <a href="/" style="margin-right:12px">&#127968;Home</a> 
+  <a href="/favourites" style="margin-right:12px">⭐Favourites</a>
+  <a href="/adsb" style="margin-right:12px">📡ADS-B Config</a>
+  <a href="/tides" style="margin-right:12px">🌊Tides Config</a>
+  <a href="/manual" style="margin-right:12px">&#128216;Manual</a>
+  <a href="/network">📶Network</a>
 </nav>
 )nav";
 }
@@ -735,7 +735,7 @@ html += R"rawliteral(
 <div class="card">
 <a href="/network">
 <h2>📶 Network</h2>
-<p>Configure Wi-Fi and network settings.</p>
+<p>Configure Wi-Fi and Audio settings.</p>
 </a>
 </div>
 
@@ -844,7 +844,32 @@ button{
 html += renderNav();
 
 html += R"rawliteral(
+<div class="card">
 
+<h2>Quick Controls</h2>
+
+<div style="display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-top:15px;">
+
+<button onclick="fetch('/api/favourites/prev',{method:'POST'})">
+◀ Previous Station
+</button>
+
+<button onclick="fetch('/api/favourites/next',{method:'POST'})">
+Next Station ▶
+</button>
+
+<button onclick="fetch('/api/vol/down',{method:'POST'})">
+🔉 Volume -
+</button>
+
+<button onclick="fetch('/api/vol/up',{method:'POST'})">
+🔊 Volume +
+</button>
+
+</div>
 
 <div class="card">
       <center>
@@ -853,6 +878,7 @@ html += R"rawliteral(
     <ul id="list"></ul>
 
 </div>
+
 
 <div class="card">
 
