@@ -199,7 +199,26 @@ static void handleNetworkApMode()
   server.sendHeader("Location", "/network");
   server.send(303, "text/plain", "OK");
 }
+static int currentFav = 0;
+static void handleNextFav()
+{
+    currentFav++;
+    if (currentFav >= favsCount())
+        currentFav = 0;
+    FavStation s = favsGet(currentFav);
+    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    server.send(200, "application/json", favsListJson());
+}
 
+static void handlePrevFav()
+{
+    currentFav--;
+    if (currentFav < 0)
+        currentFav = favsCount() - 1;
+    FavStation s = favsGet(currentFav);
+    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    server.send(200, "application/json", favsListJson());
+} 
 static void handleListFavs()
 {
     server.send(200, "application/json", favsListJson());
@@ -378,6 +397,8 @@ void webuiInit()
     server.on("/api/station/prev", HTTP_POST, handleStationPrev);
     server.on("/api/favourites", HTTP_GET, handleListFavs);
     server.on("/api/favourites", HTTP_POST, handleAddFav);
+    server.on("/api/favourites/next", HTTP_POST, handleNextFav);
+    server.on("/api/favourites/prev", HTTP_POST, handlePrevFav);        
     server.on("/api/favourites", HTTP_DELETE, handleDeleteFav);
     server.on("/api/favourites/play", HTTP_POST, handlePlayFav);
     server.on("/adsb", HTTP_POST, handleAdsbSave);
@@ -512,60 +533,200 @@ void webuiInit()
         f.close();
     });
 
-    server.on("/", HTTP_GET, []() {
-        String html;
-        html.reserve(2600);
-        html += R"rawliteral(
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Intenet Radio By stevecrow74</title>
-    <style>
-      body{font-family:Arial;margin:16px;max-width:900px}
-      .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
-      a{display:inline-block;margin:6px 12px 6px 0}
-    </style>
-  </head>
-  <body>
+
+server.on("/", HTTP_GET, []() {
+
+    String html;
+    html.reserve(2600);
+
+    // <<< we'll insert the new page here >>>
+
+   
+
+    html += R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>ESP32 Smart Radio V2</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+
+    margin:0;
+    background:#1c1c1c;
+    color:#ffffff;
+    font-family:Arial,Helvetica,sans-serif;
+
+}
+
+header{
+
+    background:#0b5ed7;
+    padding:20px;
+    text-align:center;
+
+}
+
+header h1{
+
+    margin:0;
+    font-size:30px;
+
+}
+
+header p{
+
+    margin:8px 0 0;
+    color:#d7e7ff;
+
+}
+
+.container{
+
+    width:95%;
+    max-width:1000px;
+    margin:25px auto;
+
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+
+}
+
+.card{
+
+    background:#2a2a2a;
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    transition:.2s;
+
+}
+
+.card:hover{
+
+    background:#353535;
+
+}
+
+.card a{
+
+    color:white;
+    text-decoration:none;
+    display:block;
+
+}
+
+.card h2{
+
+    margin-top:0;
+    color:#4da3ff;
+
+}
+
+.footer{
+
+    text-align:center;
+    margin:30px;
+    color:#999;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h2>ESP32 Internet Radio V3</h2>
+
+<p>Internet Radio by stevecrow74</p>
+
+</header>
+
+<div class="container">
+  
+
+<div class="card">
+
+<h2>Quick Controls</h2>
+
+<div style="display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-top:15px;">
+
+<button onclick="fetch('/api/favourites/prev',{method:'POST'})">
+◀ Previous Station
+</button>
+
+<button onclick="fetch('/api/favourites/next',{method:'POST'})">
+Next Station ▶
+</button>
+
+<button onclick="fetch('/api/vol/down',{method:'POST'})">
+🔉 Volume -
+</button>
+
+<button onclick="fetch('/api/vol/up',{method:'POST'})">
+🔊 Volume +
+</button>
+
+</div>
+
+</div>
+
+
+<div class="grid">
 )rawliteral";
-        html += renderNav();
-        html += R"rawliteral(
-    <div class="card">
-      <h2>ESP32 Radio</h2>
-      <p>Use the links below to manage the radio.</p>
-      <a href="/favourites">Open Favourites</a>
-      <a href="/adsb">Open ADS-B Config</a>
-      <a href="/tides">Open Tides Config</a>
-      <a href="/manual">Open Manual</a>
-      <a href="/network">Open Network</a>
-    </div>
-    <div class="card">
-      <h2>Controls</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <button onclick="stationCmd('prev')">&#9664; Station</button>
-        <button onclick="stationCmd('next')">Station &#9654;</button>
-        <button onclick="volCmd('down')">Vol &minus;</button>
-        <button onclick="volCmd('up')">Vol +</button>
-        <span>Volume: <strong id="vol">--</strong></span>
-      </div>
-    </div>
-    <script>
-      async function volCmd(dir) {
-        const res = await fetch('/api/vol/' + dir, {method:'POST'});
-        document.getElementById('vol').textContent = await res.text();
-      }
-      async function stationCmd(dir) {
-        await fetch('/api/station/' + dir, {method:'POST'});
-      }
-      fetch('/api/vol').then(r=>r.text()).then(v=>{
-        document.getElementById('vol').textContent=v;
-      });
-    </script>
-  </body>
-</html>
+html += R"rawliteral(
+
+<div class="card">
+<a href="/favourites">
+<h2>⭐ Favourites</h2>
+<p>Manage your favourite radio stations.</p>
+</a>
+</div>
+
+<div class="card">
+<a href="/adsb">
+<h2>📡 ADS-B Radar</h2>
+<p>View and configure your ADS-B radar.</p>
+</a>
+</div>
+
+<div class="card">
+<a href="/tides">
+<h2>🌊 Tides</h2>
+<p>View and configure tide information.</p>
+</a>
+</div>
+
+<div class="card">
+<a href="/network">
+<h2>📶 Network</h2>
+<p>Configure Wi-Fi and network settings.</p>
+</a>
+</div>
+
 )rawliteral";
+
         server.send(200, "text/html", html);
     });
 
@@ -630,9 +791,20 @@ void webuiInit()
         document.getElementById('url').value = '';
         load();
       }
-      async function del(idx) {
-        await fetch('/api/favourites?index=' + idx, { method: 'DELETE' });
-        load();
+     async function del(idx) {
+
+    const res = await fetch('/api/favourites');
+    const arr = await res.json();
+
+    if (!confirm(`Delete "${arr[idx].name}" from favourites?`))
+        return;
+
+    await fetch('/api/favourites?index=' + idx, {
+        method: 'DELETE'
+    });
+
+    load();
+    
       }
       async function play(idx) {
         await fetch('/api/favourites/play?index=' + idx, { method: 'POST' });

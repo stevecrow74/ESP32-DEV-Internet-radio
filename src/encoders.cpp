@@ -27,9 +27,9 @@ static unsigned long mutePressStart = 0;
 static unsigned long favouritesEnterTime = 0;
 static bool favouritesActive = false;
 
-const unsigned long BUTTON_DEBOUNCE = 200;
-const unsigned long LONG_PRESS_MS = 3000;
-const unsigned long FAVOURITES_TIMEOUT_MS = 10000;
+const unsigned long BUTTON_DEBOUNCE = 10;
+const unsigned long LONG_PRESS_MS = 2000;
+const unsigned long FAVOURITES_TIMEOUT_MS = 4000;
 
 void encodersInit()
 {

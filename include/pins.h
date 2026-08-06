@@ -26,17 +26,17 @@ constexpr uint8_t I2S_LRC  = 25;
 constexpr uint8_t I2S_DOUT = 22;
 
 //==================================================
-// Encoder 1 (Volume)
+// Encoder 1 (Station / Menu)
 //==================================================
 
-constexpr uint8_t ENC1_CLK = 32;
-constexpr uint8_t ENC1_DT  = 33;
-constexpr uint8_t ENC1_SW  = 27;
+constexpr uint8_t ENC2_CLK = 32;
+constexpr uint8_t ENC2_DT  = 33;
+constexpr uint8_t ENC2_SW  = 27;
 
 //==================================================
-// Encoder 2 (Station / Menu)
+// Encoder 2 (Volume / Mute)
 //==================================================
 
-constexpr uint8_t ENC2_CLK = 14;
-constexpr uint8_t ENC2_DT  = 13;
-constexpr uint8_t ENC2_SW  = 21;
+constexpr uint8_t ENC1_CLK = 14;
+constexpr uint8_t ENC1_DT  = 13;
+constexpr uint8_t ENC1_SW  = 21;
