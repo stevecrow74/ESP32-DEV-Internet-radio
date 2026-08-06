@@ -411,7 +411,20 @@ void webuiInit()
     server.on("/api/networksaved", HTTP_POST, handleSavedNetworkAdd);
     server.on("/api/networksaved", HTTP_DELETE, handleSavedNetworkDelete);
     server.on("/manual", HTTP_GET, []() {
-        if (!SPIFFS.exists("/manual.html"))
+    server.on("/webui.css", HTTP_GET, []() {
+        if (SPIFFS.exists("/webui.css"))
+        {
+            File f = SPIFFS.open("/webui.css", "r");
+            server.streamFile(f, "text/css");
+            f.close();
+        }
+        else
+        {
+            server.send(404, "text/plain", "Not found");
+        }
+    });
+    
+      if (!SPIFFS.exists("/manual.html"))
         {
             String html;
             html.reserve(3800);
@@ -419,6 +432,7 @@ void webuiInit()
 <!doctype html>
 <html>
   <head>
+  <link rel="stylesheet" href="/webui.css">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>ESP32 Radio - Manual</title>
@@ -654,7 +668,7 @@ header p{
 
 <header>
 
-<h2>ESP32 Internet Radio V3</h2>
+<h2>ESP32 Internet V3</h2>
 
 <p>Internet Radio by stevecrow74</p>
 
@@ -734,86 +748,227 @@ html += R"rawliteral(
         String html;
         html.reserve(3200);
         html += R"rawliteral(
+        
 <!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ESP32 Radio - Favourites</title>
-    <style>
-      body{font-family:Arial;margin:16px;max-width:900px}
-      .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
-      input{padding:6px;margin:4px 0;width:100%;max-width:520px;box-sizing:border-box}
-      button{padding:6px 10px;margin:4px 4px 4px 0}
-      li{margin:6px 0}
-    </style>
-  </head>
-  <body>
-)rawliteral";
-        html += renderNav();
-        html += R"rawliteral(
-    <div class="card">
-      <h2>Favourites</h2>
-      <ul id="list"></ul>
-      <h3>Add Favourite</h3>
-      <input id="name" placeholder="Name" />
-      <input id="url" placeholder="Stream URL" />
-      <button id="add">Add</button>
-    </div>
-    <script>
-      async function load() {
-        const res = await fetch('/api/favourites');
-        const arr = await res.json();
-        const list = document.getElementById('list');
-        list.innerHTML = '';
-        arr.forEach((it, idx) => {
-          const li = document.createElement('li');
-          li.innerHTML = `<strong>${it.name}</strong> — ${it.url} ` +
-            `<button onclick="play(${idx})">Play</button> ` +
-            `<button onclick="del(${idx})">Delete</button>`;
-          list.appendChild(li);
-        });
-      }
-      async function add() {
-        const name = document.getElementById('name').value;
-        const url = document.getElementById('url').value;
-        const res = await fetch('/api/favourites', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({name, url})
-        });
-        if (!res.ok) {
-          const txt = await res.text();
-          alert('Add failed: ' + txt);
-          return;
-        }
-        document.getElementById('name').value = '';
-        document.getElementById('url').value = '';
-        load();
-      }
-     async function del(idx) {
+    <title> Favourites</title>
+<style>
 
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#202124;
+    color:#fff;
+}
+
+h2,h3{
+    margin-top:0;
+}
+
+.card{
+    background:#2b2b2b;
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:20px;
+}
+
+#list{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+#list li{
+    background:#3a3a3a;
+    border-radius:8px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.stationName{
+    font-weight:bold;
+    font-size:20px;
+}
+
+.stationUrl{
+    font-size:12px;
+    color:#bbb;
+    margin-top:4px;
+    word-break:break-all;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+    box-sizing:border-box;
+    font-size:15px;
+}
+
+button{
+    border:none;
+    border-radius:6px;
+    padding:10px 16px;
+    cursor:pointer;
+    font-size:10x;
+}
+
+.playBtn{
+    background:#2e7d32;
+    color:white;
+}
+
+.delBtn{
+    background:#c62828;
+    color:white;
+}
+
+.addBtn{
+    background:#1976d2;
+    color:white;
+}
+    </style>
+<body>
+)rawliteral";
+
+html += renderNav();
+
+html += R"rawliteral(
+
+
+<div class="card">
+      <center>
+    <h2>⭐Favourite Stations</h2>
+      </center>
+    <ul id="list"></ul>
+
+</div>
+
+<div class="card">
+
+    <h2>Add Favourite</h2>
+
+    <input id="name" placeholder="Station Name">
+
+    <input id="url" placeholder="Stream URL">
+
+    <button id="add" class="addBtn">
+        + Add Favourite
+    </button>
+
+</div>
+
+<script>
+
+async function load()
+{
     const res = await fetch('/api/favourites');
     const arr = await res.json();
 
-    if (!confirm(`Delete "${arr[idx].name}" from favourites?`))
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+
+    arr.forEach((it, idx) =>
+    {
+        const li = document.createElement('li');
+
+        li.innerHTML = `
+            <div class="stationName">${it.name}</div>
+
+            <div class="stationUrl">
+                ${it.url}
+            </div>
+
+            <div style="margin-top:10px">
+                <button class="playBtn" onclick="play(${idx})">
+                    &#9658; Play
+                </button>
+
+                <button class="delBtn" onclick="del(${idx})">
+                    Delete
+                </button>
+            </div>
+        `;
+
+        list.appendChild(li);
+    });
+}
+
+async function add()
+{
+    const name = document.getElementById('name').value;
+    const url = document.getElementById('url').value;
+
+    const res = await fetch('/api/favourites',
+    {
+        method:'POST',
+        headers:
+        {
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify(
+        {
+            name,
+            url
+        })
+    });
+
+    if(!res.ok)
+    {
+        const txt = await res.text();
+        alert('Add failed: ' + txt);
+        return;
+    }
+
+    document.getElementById('name').value = '';
+    document.getElementById('url').value = '';
+
+    load();
+}
+
+async function del(idx)
+{
+    const res = await fetch('/api/favourites');
+    const arr = await res.json();
+
+    if(!confirm(`Delete "${arr[idx].name}" from favourites?`))
         return;
 
-    await fetch('/api/favourites?index=' + idx, {
-        method: 'DELETE'
+    await fetch('/api/favourites?index=' + idx,
+    {
+        method:'DELETE'
     });
 
     load();
-    
-      }
-      async function play(idx) {
-        await fetch('/api/favourites/play?index=' + idx, { method: 'POST' });
-      }
-      document.getElementById('add').addEventListener('click', add);
-      load();
-    </script>
-  </body>
+}
+
+async function play(idx)
+{
+    await fetch('/api/favourites/play?index=' + idx,
+    {
+        method:'POST'
+    });
+}
+
+document.getElementById('add').addEventListener('click', add);
+
+load();
+
+</script>
+</style>
+</body>
 </html>
+
 )rawliteral";
         server.send(200, "text/html", html);
     });
