@@ -204,30 +204,30 @@ drawScrollingText(
 
     // Volume
 
-    tft.setCursor(10,248);
+    tft.setCursor(10,300);
     tft.print("Volume");
 
     // Bar outline
-    tft.drawRect(80,248,110,10,COLOR_TEXT);
+    tft.drawRect(80,300,110,10,COLOR_TEXT);
 
     // Clear inside
-    tft.fillRect(81,249,108,8,COLOR_BACKGROUND);
+    tft.fillRect(81,301,108,8,COLOR_BACKGROUND);
 
     // Calculate width
     int barWidth = map(audioGetVolume(),0,MAX_VOLUME,0,108);
 
     // Draw level
-    tft.fillRect(81,249,barWidth,8,COLOR_SUCCESS);
+    tft.fillRect(81,301,barWidth,8,COLOR_SUCCESS);
 }
 
 void audioWidgetUpdateVolume()
 {
     // Clear inside only
-    tft.fillRect(81,249,108,8,COLOR_BACKGROUND);
+    tft.fillRect(81,301,108,8,COLOR_BACKGROUND);
 
     // Calculate width
     int barWidth = map(audioGetVolume(),0,MAX_VOLUME,0,108);
 
     // Draw new level
-    tft.fillRect(81,249,barWidth,8,COLOR_SUCCESS);
+    tft.fillRect(81,301,barWidth,8,COLOR_SUCCESS);
 }

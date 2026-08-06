@@ -32,7 +32,7 @@ struct AdsbAircraft
 
 static AdsbAircraft nearestAircraft;
 static int aircraftCount = -1;
-static String adsbStatus = "Waiting...";
+static String adsbStatus = "Searching..";
 static unsigned long lastFetchMs = 0;
 static bool fetchInProgress = false;
 

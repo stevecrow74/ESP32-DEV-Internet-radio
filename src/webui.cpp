@@ -22,18 +22,22 @@ static void setNetworkStatus(const String &msg)
   msg.toCharArray(networkStatus, sizeof(networkStatus));
 }
 
-static String renderNav()
+String renderNav(const char *page = "")
 {
-    return R"nav(
-<nav style="margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #ddd">
-  <a href="/" style="margin-right:12px">&#127968;Home</a> 
-  <a href="/favourites" style="margin-right:12px">⭐Favourites</a>
-  <a href="/adsb" style="margin-right:12px">📡ADS-B Config</a>
-  <a href="/tides" style="margin-right:12px">🌊Tides Config</a>
-  <a href="/manual" style="margin-right:12px">&#128216;Manual</a>
-  <a href="/network">📶Network</a>
-</nav>
-)nav";
+
+    auto active = [&](const char *p){
+        return strcmp(page, p) == 0 ? " class=\"active\"" : "";
+    };
+
+    String s = "<nav class='topnav'>";
+    s += "<a href='/'" + String(active("/")) + ">🏠 Home</a>";
+    s += "<a href='/favourites'" + String(active("/favourites")) + ">⭐ Favs</a>";
+    s += "<a href='/adsb'" + String(active("/adsb")) + ">📡 ADS-B</a>";
+    s += "<a href='/tides'" + String(active("/tides")) + ">🌊 Tides</a>";
+    s += "<a href='/manual'" + String(active("/manual")) + ">📖 Manual</a>";
+    s += "<a href='/network'" + String(active("/network")) + ">📶 WiFi</a>";
+    s += "</nav>";
+    return s;
 }
 
 static String htmlEscape(const String &in)
@@ -437,6 +441,38 @@ void webuiInit()
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>ESP32 Radio - Manual</title>
     <style>
+    /* Navigation */
+
+.topnav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:8px 0;
+    margin-bottom:16px;
+    border-bottom:1px solid #444;
+    scrollbar-width:none;
+}
+
+.topnav::-webkit-scrollbar{
+    display:none;
+}
+
+.topnav a{
+    flex:none;
+    text-decoration:none;
+    color:#fff;
+    background:#333;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.topnav a.active{
+    background:#0078d7;
+}
+
+
       body{font-family:Arial;margin:16px;max-width:900px}
       .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
     </style>
@@ -760,7 +796,36 @@ html += R"rawliteral(
 *{
     box-sizing:border-box;
 }
+/* Navigation */
 
+.topnav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:8px 0;
+    margin-bottom:16px;
+    border-bottom:1px solid #444;
+    scrollbar-width:none;
+}
+
+.topnav::-webkit-scrollbar{
+    display:none;
+}
+
+.topnav a{
+    flex:none;
+    text-decoration:none;
+    color:#fff;
+    background:#333;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.topnav a.active{
+    background:#0078d7;
+}
 body{
     margin:0;
     padding:20px;
@@ -841,7 +906,7 @@ button{
 <body>
 )rawliteral";
 
-html += renderNav();
+html += renderNav("/favourites");
 
 html += R"rawliteral(
 <div class="card">
@@ -1009,18 +1074,130 @@ load();
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>ESP32 Radio - ADS-B Config</title>
-    <style>
-      body{font-family:Arial;margin:16px;max-width:900px}
-      .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
-      input{padding:6px;margin:4px 0;width:100%;max-width:650px;box-sizing:border-box}
-      button{padding:6px 12px;margin-top:8px}
-      label{font-weight:bold;display:block;margin-top:8px}
-      .hint{color:#666;font-size:0.9em}
-    </style>
+   <style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#202124;
+    color:#fff;
+}
+    /* Navigation */
+
+.topnav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:8px 0;
+    margin-bottom:16px;
+    border-bottom:1px solid #444;
+    scrollbar-width:none;
+}
+
+.topnav::-webkit-scrollbar{
+    display:none;
+}
+
+.topnav a{
+    flex:none;
+    text-decoration:none;
+    color:#fff;
+    background:#333;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.topnav a.active{
+    background:#0078d7;
+}
+
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+.card{
+    background:#2b2b2b;
+    border:1px solid #444;
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin:14px 0 6px;
+    font-weight:bold;
+    color:#ddd;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+    box-sizing:border-box;
+    font-size:15px;
+}
+input:focus{
+    outline:none;
+    border-color:#2196F3;
+}
+
+button{
+    padding:10px 18px;
+    margin-top:16px;
+    border:none;
+    border-radius:6px;
+    background:#2196F3;
+    color:#fff;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover{
+    background:#1976D2;
+}
+
+.hint{
+    margin-top:4px;
+    color:#aaa;
+    font-size:0.9em;
+}
+
+@media (max-width:600px){
+
+    body{
+        padding:12px;
+    }
+
+    .card{
+        padding:12px;
+    }
+
+    input,
+    button{
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+    }
+}
+
+</style>
   </head>
   <body>
 )rawliteral";
-        html += renderNav();
+        html += renderNav("/adsb");
         html += "<div class=\"card\"><h2>ADS-B Config</h2><form method=\"post\" action=\"/adsb\">";
         html += "<label>Range (km)</label><input name=\"rangeKm\" type=\"number\" min=\"1\" max=\"500\" value=\"";
         html += String(adsbRangeKm());
@@ -1049,18 +1226,131 @@ load();
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>ESP32 Radio - Tides Config</title>
-    <style>
-      body{font-family:Arial;margin:16px;max-width:900px}
-      .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
-      input{padding:6px;margin:4px 0;width:100%;max-width:650px;box-sizing:border-box}
-      button{padding:6px 12px;margin-top:8px}
-      label{font-weight:bold;display:block;margin-top:8px}
-      .hint{color:#666;font-size:0.9em}
-    </style>
+   <style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#202124;
+    color:#fff;
+}
+    /* Navigation */
+
+.topnav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:8px 0;
+    margin-bottom:16px;
+    border-bottom:1px solid #444;
+    scrollbar-width:none;
+}
+
+.topnav::-webkit-scrollbar{
+    display:none;
+}
+
+.topnav a{
+    flex:none;
+    text-decoration:none;
+    color:#fff;
+    background:#333;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.topnav a.active{
+    background:#0078d7;
+}
+
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+.card{
+    background:#2b2b2b;
+    border:1px solid #444;
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin:14px 0 6px;
+    font-weight:bold;
+    color:#ddd;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+    box-sizing:border-box;
+    font-size:15px;
+}
+
+input:focus{
+    outline:none;
+    border-color:#2196F3;
+}
+
+button{
+    padding:10px 18px;
+    margin-top:16px;
+    border:none;
+    border-radius:6px;
+    background:#2196F3;
+    color:#fff;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover{
+    background:#1976D2;
+}
+
+.hint{
+    margin-top:4px;
+    color:#aaa;
+    font-size:0.9em;
+}
+
+@media (max-width:600px){
+
+    body{
+        padding:12px;
+    }
+
+    .card{
+        padding:12px;
+    }
+
+    input,
+    button{
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+    }
+}
+
+</style>
   </head>
   <body>
 )rawliteral";
-        html += renderNav();
+        html += renderNav("/tides");
         html += "<div class=\"card\"><h2>Tides Config</h2><form method=\"post\" action=\"/tides\">";
         html += "<label>Location name</label><input name=\"location\" value=\"";
         html += htmlEscape(tidesLocation());
@@ -1100,18 +1390,131 @@ load();
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width,initial-scale=1" />
       <title>ESP32 Radio - Network</title>
-      <style>
-        body{font-family:Arial;margin:16px;max-width:900px}
-        .card{padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:16px}
-        input,select{padding:6px;margin:4px 0;width:100%;max-width:520px;box-sizing:border-box}
-        button{padding:6px 12px;margin-top:8px}
-        .muted{color:#666;font-size:0.9em}
-        .ok{color:#0a7a0a}
-      </style>
+     <style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#202124;
+    color:#fff;
+}
+    /* Navigation */
+
+.topnav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    white-space:nowrap;
+    padding:8px 0;
+    margin-bottom:16px;
+    border-bottom:1px solid #444;
+    scrollbar-width:none;
+}
+
+.topnav::-webkit-scrollbar{
+    display:none;
+}
+
+.topnav a{
+    flex:none;
+    text-decoration:none;
+    color:#fff;
+    background:#333;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.topnav a.active{
+    background:#0078d7;
+}
+
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+.card{
+    background:#2b2b2b;
+    border:1px solid #444;
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin:14px 0 6px;
+    font-weight:bold;
+    color:#ddd;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+    box-sizing:border-box;
+    font-size:15px;
+}
+    
+input:focus{
+    outline:none;
+    border-color:#2196F3;
+}
+
+button{
+    padding:10px 18px;
+    margin-top:16px;
+    border:none;
+    border-radius:6px;
+    background:#2196F3;
+    color:#fff;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover{
+    background:#1976D2;
+}
+
+.hint{
+    margin-top:4px;
+    color:#aaa;
+    font-size:0.9em;
+}
+
+@media (max-width:600px){
+
+    body{
+        padding:12px;
+    }
+
+    .card{
+        padding:12px;
+    }
+
+    input,
+    button{
+        font-size:16px;
+    }
+
+    button{
+        width:100%;
+    }
+}
+
+</style>
       </head>
       <body>
     )rawliteral";
-        html += renderNav();
+        html += renderNav("/network");
 
         html += "<div class=\"card\"><h2>Current Network</h2>";
         html += "<p><strong>Connected SSID:</strong> " + htmlEscape(currentSsid.length() ? currentSsid : String("none")) + "</p>";

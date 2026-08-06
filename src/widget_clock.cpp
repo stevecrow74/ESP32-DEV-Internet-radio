@@ -51,13 +51,19 @@ static void clockDrawContent()
     tft.setTextColor(ST77XX_WHITE);
 
     if (!ok || !clockHasValidTime()) {
-        tft.setTextSize(2);
+        tft.setTextSize(3);
         tft.setCursor(28, 170);
-        tft.print("Syncing clock...");
+        tft.setTextColor(ST77XX_RED);
+        tft.print("DONT PANIC!");
 
         tft.setTextSize(1);
-        tft.setCursor(40, 195);
-        tft.print("Connect WiFi for NTP");
+        tft.setCursor(60, 260);
+        tft.setTextColor(ST77XX_WHITE);
+        tft.print("So long and thanks");
+        tft.setCursor(70, 270);
+        tft.print("for all the fish");
+
+
         return;
     }
 

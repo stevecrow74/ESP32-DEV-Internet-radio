@@ -126,7 +126,7 @@ void weatherWidgetDraw()
     tft.setCursor(145,195);
     tft.print(weatherWind());
 
-    tft.setCursor(10,230);
+    tft.setCursor(10,215);
     tft.print(weatherDescription());
 
     drawWeatherIcon(weatherCode(), 100, 240);

@@ -11,7 +11,7 @@ static uint8_t previousVolume = DEFAULT_VOLUME;
 static bool startupMuteActive = false;
 static bool muted = false;
 static unsigned long startupMuteStartMs = 0;
-static const unsigned long STARTUP_MUTE_MS = 7000;
+static const unsigned long STARTUP_MUTE_MS = 5000;
 
 bool audioInit()
 {

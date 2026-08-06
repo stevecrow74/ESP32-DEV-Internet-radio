@@ -90,7 +90,7 @@ void drawSplashScreen()
     tft.print("Internet Radio");
 
     tft.setTextSize(2);
-    tft.setCursor(66, 40);
+    tft.setCursor(100, 40);
     tft.print("V2.0");
 
     tft.setTextSize(2);
