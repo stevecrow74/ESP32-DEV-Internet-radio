@@ -1,5 +1,5 @@
 # ESP32 Smart Radio V2 - User Manual
-![ESP32 interner radio[(img_3597.jpg)
+![ESP32 interner radio](img_3597.jpg)
 # Hardware
 This project uses:
 -ESP32 Dev board
