@@ -42,7 +42,7 @@ void drawWrappedText(int x, int y, int width, const String &text)
 
             if (x + w > width)
             {
-                cursorY += 12;
+                cursorY += 20;
                 line = "";
             }
         }
@@ -81,7 +81,7 @@ void drawWrappedText(int x, int y, int width, const String &text)
                 tft.setCursor(x, cursorY);
                 tft.print(line);
 
-                cursorY += 12;
+                cursorY += 20;
                 line = word;
             }
             else
@@ -177,33 +177,34 @@ drawScrollingText(
     drawStationLogo(currentStation);
 
     // Now Playing
-    tft.setTextSize(1);
+    tft.setTextSize(2);
     tft.setTextColor(COLOR_LABEL);
 
     tft.setCursor(10,145);
     tft.print("NOW PLAYING");
 
-    tft.drawFastHLine(10,156,220,COLOR_TEXT);
+    tft.drawFastHLine(10,166,220,COLOR_TEXT);
 
     tft.setTextColor(COLOR_TEXT);
 
-    tft.setCursor(10,170);
-    drawWrappedText(10,170,220,currentTitle);
+    tft.setCursor(15,170);
+    drawWrappedText(15,170,220,currentTitle);
 
        // Bitrate
 
-    tft.drawFastHLine(10,220,220,COLOR_TEXT);
-
-    tft.setCursor(10,230);
+    tft.drawFastHLine(10,250,220,COLOR_TEXT);
+    tft.setTextSize(1);
+    tft.setCursor(10,260);
     tft.print("Bitrate");
 
-    tft.setCursor(80,230);
+    tft.setCursor(80,260);
     tft.print(currentBitrate);
 
     tft.print(" kbps");
 
     // Volume
 
+    tft.setTextSize(1);
     tft.setCursor(10,300);
     tft.print("Volume");
 
