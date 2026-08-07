@@ -30,7 +30,8 @@ The device uses two rotary encoders.
 ### Encoder 1 (Volume/Mute)
 - Rotate: change volume (0 to 21)
 - Press: mute/unmute audio
-
+- Long press for system widget
+- 
 ### Encoder 2 (Station/Widget/Favourites)
 Normal (most widgets):
 - Rotate: next/previous favourite station (main radio browsing now uses your favourites list)
@@ -44,11 +45,11 @@ When on Favourites widget:
 ## 3. Widget Behavior
 ### Auto-cycle
 - Widgets auto-cycle every ~10 seconds.
-- Favourites widget is excluded from automatic cycle.
-- You can still access Favourites manually using widget button presses.
+- Favourites and System widget are excluded from automatic cycle.
+- You can still access Favourites and system manually using widget button presses.
 
 ### Manual hold
-- After manual widget selection, current widget is held for ~20 seconds before normal auto behavior resumes.
+- After manual widget selection, current widget is held for 10 seconds before normal auto behavior resumes.
 
 ## 4. Default Location and Time Settings
 Compile-time defaults:
