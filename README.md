@@ -1,20 +1,20 @@
 # ESP32 Smart Radio V2 - User Manual
 ![ESP32 interner radio](img_3597.jpg)
 
-ive sone a major overhaul of this project!
+I've sone a major overhaul of this project!
 
-ive removed the rotary encoders altogether and using capacitive touch
+I've removed the rotary encoders altogether and using capacitive touch
 to control stations and volume.
 
-ive also replace the ESP32-D with an ESP32-S3-N16R8 board. 
-
-
+I've also replace the ESP32-D with an ESP32-S3-N16R8 board. 
+ 
+I'll put changes in brackets beside original functions
 
 
 # Hardware
 This project uses:
--ESP32 Dev board
-- 2 rotary encoders
+-ESP32 Dev board (ESP32-S3-N16R8)
+- 2 rotary encoders (4 wires for capasitive touch)
 - GMT020-02 ST7789 2" LCD
 - GY-PCM5102 I2S Stereo Board
 
@@ -25,7 +25,7 @@ This build uses my own local settings, these can be changed in the Webui.
 
 
 ## 1. Overview
-ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls, audio streaming, and a built-in browser-based Web UI for management.
+ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls (touch pads), audio streaming, and a built-in browser-based Web UI for management.
 
 Main features:
 - Internet radio streaming
@@ -36,17 +36,21 @@ Main features:
 - Network scan/connect, saved Wi-Fi credentials, and AP mode
 
 ## 2. Hardware Controls
-The device uses two rotary encoders.
+The device uses two rotary encoders.(4 wires)
 
-### Encoder 1 (Volume/Mute)
-- Rotate: change volume (0 to 21)
-- Press: mute/unmute audio
+### Encoder 1 (Volume/Mute) (wires 2&3)
+- Rotate(tap): change volume (0 to 21)
+- Press: mute/unmute audio(long press button)
 - Long press for system widget
 - 
-### Encoder 2 (Station/Widget/Favourites)
+### Encoder 2 (Station/Widget/Favourites) (wires 1&2)
 Normal (most widgets):
-- Rotate: next/previous favourite station (main radio browsing now uses your favourites list)
+- Rotate (tap): next/previous favourite station (main radio browsing now uses your favourites list)
 - Press: next widget (manual widget selection)
+
+### Button
+- short press: changes between widgets
+- long press: mute/unmute
 
 When on Favourites widget:
 - Rotate: move selection in favourites list
