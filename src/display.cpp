@@ -73,7 +73,7 @@ void displayInit()
 {
     tft.init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    tft.setRotation(0);
+    tft.setRotation(2);
 
     tft.fillScreen(COLOUR_BACKGROUND);
 

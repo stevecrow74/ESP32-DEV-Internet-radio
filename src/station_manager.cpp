@@ -3,8 +3,8 @@
 #include "audio_state.h"
 #include "favourites.h"
 
-static const char *DEFAULT_NAME = "Classic Hits";
-static const char *DEFAULT_URL = "http://live-bauerie.sharp-stream.com/CLASSIC?ref=RF ";
+static const char *DEFAULT_NAME = "RAdio X UK";
+static const char *DEFAULT_URL = "https://icecast.thisisdax.com/RadioXUK";
 
 static int current = 0;
 static RadioStation currentRadioStation = {DEFAULT_NAME, DEFAULT_URL};
@@ -21,7 +21,7 @@ void stationInit()
     for (int i = 0; i < count; i++)
     {
         FavStation s = favsGet(i);
-        if (s.name.equalsIgnoreCase("Classic Hits"))
+        if (s.name.equalsIgnoreCase("Radio X Uk"))
         {
             current = i;
             break;
