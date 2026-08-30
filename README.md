@@ -1,5 +1,16 @@
 # ESP32 Smart Radio V2 - User Manual
 ![ESP32 interner radio](img_3597.jpg)
+
+ive sone a major overhaul of this project!
+
+ive removed the rotary encoders altogether and using capacitive touch
+to control stations and volume.
+
+ive also replace the ESP32-D with an ESP32-S3-N16R8 board. 
+
+
+
+
 # Hardware
 This project uses:
 -ESP32 Dev board
