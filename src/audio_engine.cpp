@@ -5,6 +5,7 @@
 #include "widget_audio.h"
 #include "audio_buffer_config.h"
 #include "Audio.h"
+#include <Preferences.h>
 
 Audio audio;
 
@@ -15,6 +16,7 @@ static bool startupMuteActive = false;
 static bool muted = false;
 
 static unsigned long startupMuteStartMs = 0;
+static uint8_t startupVolume = DEFAULT_VOLUME;
 
 static const unsigned long STARTUP_MUTE_MS = 5000;
 
@@ -31,6 +33,13 @@ bool audioInit()
     // --------------------------------------------------------
 
     audioBufferConfigInit();
+
+    Preferences preferences;
+    preferences.begin("radio", true);
+    startupVolume = preferences.getUChar("volume", DEFAULT_VOLUME);
+    preferences.end();
+    if (startupVolume > MAX_VOLUME)
+        startupVolume = DEFAULT_VOLUME;
 
     audio.setBufsize(
         audioBufferRamBytes(),
@@ -61,7 +70,7 @@ bool audioInit()
     // --------------------------------------------------------
 
     currentVolume = 0;
-    previousVolume = DEFAULT_VOLUME;
+    previousVolume = startupVolume;
 
     startupMuteActive = true;
     muted = true;
@@ -90,7 +99,7 @@ void audioLoop()
     {
         startupMuteActive = false;
 
-        audioSetVolume(DEFAULT_VOLUME);
+        audioSetVolume(startupVolume);
 
         Serial.println("[AUDIO] Startup mute released");
     }
@@ -139,6 +148,11 @@ void audioSetVolume(uint8_t v)
     muted = (v == 0);
 
     audio.setVolume(v);
+
+    Preferences preferences;
+    preferences.begin("radio", false);
+    preferences.putUChar("volume", v);
+    preferences.end();
 }
 
 // ============================================================

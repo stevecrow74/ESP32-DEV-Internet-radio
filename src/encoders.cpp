@@ -47,6 +47,7 @@ constexpr uint8_t TOUCH_VOLUME_UP   = 5;
 
 constexpr unsigned long BUTTON_DEBOUNCE_MS = 40;
 constexpr unsigned long BUTTON_LONG_PRESS_MS = 2000;
+constexpr unsigned long FAVOURITES_HIGHLIGHT_MS = 3000;
 
 // ============================================================
 // TOUCH SETTINGS
@@ -69,6 +70,10 @@ static bool lastButtonState = HIGH;
 
 static unsigned long buttonPressStart = 0;
 static unsigned long lastButtonEvent = 0;
+
+static bool favouritesActive = false;
+static bool favouriteSelectionPending = false;
+static unsigned long favouriteSelectionAt = 0;
 
 // ============================================================
 // TOUCH BASELINES
@@ -298,19 +303,8 @@ static void handleButton(
         if (held >= BUTTON_LONG_PRESS_MS)
         {
             Serial.println(
-                "[BUTTON] GPIO 1 LONG PRESS"
+                "[BUTTON] GPIO 1 LONG PRESS (unused)"
             );
-
-            Serial.println(
-                "[BUTTON] Opening Favourites"
-            );
-
-            currentWidget = WIDGET_AUDIO;
-
-            favouritesActive:
-            favWidgetDraw();
-
-            widgetUserActivity();
         }
 
         // ====================================================
@@ -368,8 +362,18 @@ static void handleTouchPrevious(
 
         widgetUserActivity();
 
-        stationPrevious();
-        stationConnectCurrent();
+        if ((favouritesActive || currentWidget == WIDGET_FAVORITES) &&
+            !favouriteSelectionPending)
+        {
+            favWidgetRotate(-1);
+            favouritesActive = true;
+            favouriteSelectionAt = now + FAVOURITES_HIGHLIGHT_MS;
+        }
+        else if (!favouritesActive && currentWidget != WIDGET_FAVORITES)
+        {
+            stationPrevious();
+            stationConnectCurrent();
+        }
     }
 
     if (!detected)
@@ -415,8 +419,18 @@ static void handleTouchNext(
 
         widgetUserActivity();
 
-        stationNext();
-        stationConnectCurrent();
+        if ((favouritesActive || currentWidget == WIDGET_FAVORITES) &&
+            !favouriteSelectionPending)
+        {
+            favWidgetRotate(1);
+            favouritesActive = true;
+            favouriteSelectionAt = now + FAVOURITES_HIGHLIGHT_MS;
+        }
+        else if (!favouritesActive && currentWidget != WIDGET_FAVORITES)
+        {
+            stationNext();
+            stationConnectCurrent();
+        }
     }
 
     if (!detected)
@@ -559,5 +573,21 @@ void encodersLoop()
     handleTouchVolumeDown(now);
 
     handleTouchVolumeUp(now);
+
+    if (favouritesActive && !favouriteSelectionPending &&
+        (long)(now - favouriteSelectionAt) >= 0)
+    {
+        favWidgetSelect();
+        favouriteSelectionPending = true;
+        widgetHoldSelectedFor(FAVOURITES_HIGHLIGHT_MS);
+    }
+
+    if (favouritesActive && favouriteSelectionPending &&
+        (long)(now - (favouriteSelectionAt + FAVOURITES_HIGHLIGHT_MS)) >= 0)
+    {
+        favouritesActive = false;
+        favouriteSelectionPending = false;
+        widgetDraw();
+    }
 }
 

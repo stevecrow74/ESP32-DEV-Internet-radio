@@ -25,30 +25,31 @@
       <ol>
         <li>Power on the radio.</li>
         <li>Wait for startup and Wi-Fi connection.</li>
-        <li>Use the right encoder to change station and widgets.</li>
+        <li>Use GPIO 1 to move through widgets and the touch pads to change station or volume.</li>
         <li>Open <code>http://DEVICE_IP/</code> for Web UI management.</li>
       </ol>
     </div>
 
     <div class="card">
-      <h2>2. Encoder Controls</h2>
-      <h3>Left Encoder (Volume)</h3>
+      <h2>2. Button and Touch Controls</h2>
+      <h3>GPIO 1 Button</h3>
       <ul>
-        <li>Rotate: Volume up/down</li>
-        <li>Press: Mute/unmute</li>
+        <li>Short press: Next widget</li>
+        <li>Long press: Currently unused</li>
       </ul>
-      <h3>Right Encoder (Station/Widgets)</h3>
+      <h3>Touch Pads</h3>
       <ul>
-        <li>Rotate: Next/previous favourite station (normal mode)</li>
-        <li>Press: Next widget</li>
+        <li>GPIO 2: Previous station</li>
+        <li>GPIO 6: Next station</li>
+        <li>GPIO 4: Volume down</li>
+        <li>GPIO 5: Volume up</li>
       </ul>
       <p>Main station browsing uses your favourites list.</p>
       <p>Startup default is Rewind when present in favourites.</p>
       <h3>In Favourites Widget</h3>
       <ul>
-        <li>Rotate: Move selection</li>
-        <li>Short press: Play selected favourite</li>
-        <li>Long press (~5s): Delete selected favourite</li>
+        <li>GPIO 2/GPIO 6: Move selection</li>
+        <li>After three seconds without another touch: Play selected favourite</li>
       </ul>
     </div>
 
@@ -61,9 +62,10 @@
         <li>Tides</li>
         <li>Audio</li>
         <li>Favourites</li>
+        <li>System</li>
       </ul>
-      <p>Widgets auto-cycle every ~10 seconds.</p>
-      <p>Favourites is excluded from auto-cycle and available by manual widget switching.</p>
+      <p>Press GPIO 1 to advance through the widget sequence. Favourites is part of the normal sequence.</p>
+      <p>The Tides widget shows the day's high and low events in High/Low, Time, and Height columns.</p>
     </div>
 
     <div class="card">
@@ -87,7 +89,7 @@
         <li>Timezone: Irish time (DST aware)</li>
       </ul>
       <p>ADS-B and tides settings can be changed in Web UI and are saved to SPIFFS.</p>
-      <p>Tides widget currently parses next high/low, trend and height from the configured source URL.</p>
+      <p>The Tides widget parses and displays all available daily high/low events from the configured source URL.</p>
     </div>
 
     <div class="card">

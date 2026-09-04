@@ -55,6 +55,8 @@ static void saveFavs()
         JsonObject o = arr.add<JsonObject>();
         o["name"] = f.name;
         o["url"] = f.url;
+        if (f.logoUrl.length())
+            o["logo"] = f.logoUrl;
     }
 
     File f = SPIFFS.open(FAV_FILE, FILE_WRITE);
@@ -98,6 +100,7 @@ void favsInit()
         FavStation s;
         s.name = o["name"].as<const char*>() ? String(o["name"].as<const char*>()) : String("");
         s.url = o["url"].as<const char*>() ? String(o["url"].as<const char*>()) : String("");
+        s.logoUrl = o["logo"].as<const char*>() ? String(o["logo"].as<const char*>()) : String("");
         favs.push_back(s);
     }
 }
@@ -107,11 +110,12 @@ int favsCount()
     return (int)favs.size();
 }
 
-bool favsAdd(const String &name, const String &url)
+bool favsAdd(const String &name, const String &url, const String &logoUrl)
 {
     FavStation s;
     s.name = name;
     s.url = url;
+    s.logoUrl = logoUrl;
     favs.push_back(s);
     saveFavs();
     return true;
@@ -122,6 +126,16 @@ bool favsRemove(int index)
     if (index < 0 || index >= (int)favs.size())
         return false;
     favs.erase(favs.begin() + index);
+    saveFavs();
+    return true;
+}
+
+bool favsSetLogoUrl(int index, const String &logoUrl)
+{
+    if (index < 0 || index >= (int)favs.size())
+        return false;
+
+    favs[index].logoUrl = logoUrl;
     saveFavs();
     return true;
 }
@@ -143,6 +157,8 @@ String favsListJson()
         JsonObject o = arr.add<JsonObject>();
         o["name"] = f.name;
         o["url"] = f.url;
+        if (f.logoUrl.length())
+            o["logo"] = f.logoUrl;
     }
 
     String out;

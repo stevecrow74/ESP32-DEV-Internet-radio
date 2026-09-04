@@ -6,24 +6,24 @@
 3. Check the screen status bar for Wi-Fi and time.
 
 ## 2. Basic Controls
-### Left encoder (Volume)
-- Rotate: volume up/down
-- Press: mute/unmute
+### GPIO 1 button
+- Short press: next widget
+- Long press: unused
 
-### Right encoder (Stations and Widgets)
-- Rotate: next/previous favourite station
-- Press: next widget
+### Touch pads
+- GPIO 2: previous station
+- GPIO 6: next station
+- GPIO 4: volume down
+- GPIO 5: volume up
 
 Main station browsing uses your favourites list.
 Startup default is Rewind when present in favourites.
 
 ## 3. Favourites Widget
-- Favourites is manual access only (not in auto-cycle).
-- Use right encoder button to switch widgets until Favourites appears.
+- Press GPIO 1 until the Favourites widget appears.
 - In Favourites:
-  - Rotate: move selection
-  - Short press: play selected favourite
-  - Long press (~5s): delete selected favourite
+  - GPIO 2/GPIO 6: move selection
+  - After three seconds: play the selected favourite
 
 ## 4. Open Web UI
 1. Find the device IP on serial monitor or status bar.
@@ -52,6 +52,7 @@ Startup default is Rewind when present in favourites.
 ### Tides
 - Go to /tides
 - Set location, latitude, longitude, refresh interval, and source URL
+- The Tides widget shows all daily high/low events with time and height.
 - Save config
 
 ## 6. Default Locations and Time

@@ -6,6 +6,7 @@
 
 #include "webui.h"
 #include "audio_engine.h"
+#include "audio_state.h"
 #include "favourites.h"
 #include "station_manager.h"
 #include "adsb_config.h"
@@ -16,6 +17,9 @@
 static WebServer *serverPtr = nullptr;
 #define server (*serverPtr)
 static char networkStatus[160] = {0};
+static File favouriteLogoUpload;
+static int favouriteLogoUploadIndex = -1;
+static bool favouriteLogoUploadValid = false;
 
 static void setNetworkStatus(const String &msg)
 {
@@ -210,7 +214,7 @@ static void handleNextFav()
     if (currentFav >= favsCount())
         currentFav = 0;
     FavStation s = favsGet(currentFav);
-    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    stationPlayUrl(s.name.c_str(), s.url.c_str(), s.logoUrl.c_str());
     server.send(200, "application/json", favsListJson());
 }
 
@@ -220,7 +224,7 @@ static void handlePrevFav()
     if (currentFav < 0)
         currentFav = favsCount() - 1;
     FavStation s = favsGet(currentFav);
-    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    stationPlayUrl(s.name.c_str(), s.url.c_str(), s.logoUrl.c_str());
     server.send(200, "application/json", favsListJson());
 } 
 static void handleListFavs()
@@ -232,6 +236,7 @@ static void handleAddFav()
 {
     String name;
     String url;
+    String logoUrl;
 
     if (server.hasArg("plain"))
     {
@@ -242,6 +247,7 @@ static void handleAddFav()
         {
             name = doc["name"].as<const char *>() ? String(doc["name"].as<const char *>()) : String("");
             url = doc["url"].as<const char *>() ? String(doc["url"].as<const char *>()) : String("");
+            logoUrl = doc["logo"].as<const char *>() ? String(doc["logo"].as<const char *>()) : String("");
         }
     }
 
@@ -250,6 +256,8 @@ static void handleAddFav()
         name = server.arg("name");
     if (url.length() == 0 && server.hasArg("url"))
         url = server.arg("url");
+    if (logoUrl.length() == 0 && server.hasArg("logo"))
+        logoUrl = server.arg("logo");
 
     name.trim();
     url.trim();
@@ -260,7 +268,8 @@ static void handleAddFav()
         return;
     }
 
-  favsAdd(name, url);
+        logoUrl.trim();
+        favsAdd(name, url, logoUrl);
     server.send(201, "application/json", favsListJson());
 }
 
@@ -300,7 +309,7 @@ static void handlePlayFav()
     }
 
     FavStation s = favsGet(idx);
-    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    stationPlayUrl(s.name.c_str(), s.url.c_str(), s.logoUrl.c_str());
     server.send(200, "application/json", favsListJson());
 }
 
@@ -354,6 +363,103 @@ static void handleVolDown()
     server.send(200, "text/plain", String(audioGetVolume()));
 }
 
+static String favouriteLogoPath(int index)
+{
+    return "/logos/fav_" + String(index) + ".jpg";
+}
+
+static void handleFavouriteLogoUpload()
+{
+    HTTPUpload &upload = server.upload();
+
+    if (upload.status == UPLOAD_FILE_START)
+    {
+        favouriteLogoUploadIndex = server.arg("index").toInt();
+        favouriteLogoUploadValid = favouriteLogoUploadIndex >= 0 &&
+                                   favouriteLogoUploadIndex < favsCount();
+
+        String filename = upload.filename;
+        filename.toLowerCase();
+        favouriteLogoUploadValid = favouriteLogoUploadValid &&
+                                   (filename.endsWith(".jpg") || filename.endsWith(".jpeg"));
+
+        if (favouriteLogoUploadValid)
+        {
+            SPIFFS.mkdir("/logos");
+            favouriteLogoUpload = SPIFFS.open(
+                favouriteLogoPath(favouriteLogoUploadIndex), FILE_WRITE);
+            favouriteLogoUploadValid = favouriteLogoUpload;
+        }
+
+        Serial.print("[LOGO] upload start index=");
+        Serial.print(favouriteLogoUploadIndex);
+        Serial.print(" valid=");
+        Serial.println(favouriteLogoUploadValid ? "yes" : "no");
+    }
+    else if (upload.status == UPLOAD_FILE_WRITE)
+    {
+        if (favouriteLogoUploadValid && upload.totalSize <= 65536)
+            favouriteLogoUpload.write(upload.buf, upload.currentSize);
+        else
+            favouriteLogoUploadValid = false;
+    }
+    else if (upload.status == UPLOAD_FILE_END)
+    {
+        if (favouriteLogoUpload)
+            favouriteLogoUpload.close();
+        if (upload.totalSize == 0 || upload.totalSize > 65536)
+            favouriteLogoUploadValid = false;
+
+        Serial.print("[LOGO] upload end bytes=");
+        Serial.print(upload.totalSize);
+        Serial.print(" valid=");
+        Serial.println(favouriteLogoUploadValid ? "yes" : "no");
+    }
+    else if (upload.status == UPLOAD_FILE_ABORTED)
+    {
+        if (favouriteLogoUpload)
+            favouriteLogoUpload.close();
+        favouriteLogoUploadValid = false;
+    }
+}
+
+static void handleFavouriteLogoUploadComplete()
+{
+    if (!favouriteLogoUploadValid || favouriteLogoUploadIndex < 0 ||
+        !favsSetLogoUrl(favouriteLogoUploadIndex,
+                        favouriteLogoPath(favouriteLogoUploadIndex)))
+    {
+        server.send(400, "text/plain", "JPEG upload failed or file is too large");
+        return;
+    }
+
+    server.send(200, "application/json", favsListJson());
+}
+
+static void handleNowPlaying()
+{
+    JsonDocument doc;
+    String artist;
+    String song = currentTitle;
+    int separator = currentTitle.indexOf(" - ");
+    if (separator > 0)
+    {
+        artist = currentTitle.substring(0, separator);
+        song = currentTitle.substring(separator + 3);
+    }
+
+    doc["station"] = currentStation;
+    doc["artist"] = artist;
+    doc["song"] = song;
+    doc["title"] = currentTitle;
+    doc["bitrate"] = currentBitrate;
+    doc["volume"] = audioGetVolume();
+
+    String response;
+    serializeJson(doc, response);
+    server.send(200, "application/json", response);
+}
+
 static void handleStationNext()
 {
     stationNext();
@@ -395,6 +501,7 @@ void webuiInit()
     savedNetworksInit();
 
     server.on("/api/vol", HTTP_GET, handleVolGet);
+    server.on("/api/now-playing", HTTP_GET, handleNowPlaying);
     server.on("/api/vol/up", HTTP_POST, handleVolUp);
     server.on("/api/vol/down", HTTP_POST, handleVolDown);
     server.on("/api/station/next", HTTP_POST, handleStationNext);
@@ -405,6 +512,8 @@ void webuiInit()
     server.on("/api/favourites/prev", HTTP_POST, handlePrevFav);        
     server.on("/api/favourites", HTTP_DELETE, handleDeleteFav);
     server.on("/api/favourites/play", HTTP_POST, handlePlayFav);
+    server.on("/api/favourites/logo", HTTP_POST,
+              handleFavouriteLogoUploadComplete, handleFavouriteLogoUpload);
     server.on("/adsb", HTTP_POST, handleAdsbSave);
     server.on("/tides", HTTP_POST, handleTidesSave);
     server.on("/audio-buffer", HTTP_POST, handleAudioBufferSave);
@@ -713,6 +822,17 @@ header p{
 <div class="container">
   
 
+<div class="card" id="now-playing">
+
+<h2>Now Playing</h2>
+<div id="now-station">Connecting...</div>
+<div id="now-artist">Waiting for stream metadata...</div>
+<div id="now-song"></div>
+<div id="now-bitrate"></div>
+
+</div>
+
+
 <div class="card">
 
 <h2>Quick Controls</h2>
@@ -741,6 +861,27 @@ Next Station ▶
 </div>
 
 </div>
+
+<script>
+async function updateNowPlaying()
+{
+    try
+    {
+        const res = await fetch('/api/now-playing');
+        const now = await res.json();
+        document.getElementById('now-station').textContent = now.station || 'Connecting...';
+        document.getElementById('now-artist').textContent = now.artist || 'Waiting for stream metadata...';
+        document.getElementById('now-song').textContent = now.song || '';
+        document.getElementById('now-bitrate').textContent = now.bitrate ? now.bitrate + ' kbps' : '';
+    }
+    catch (error)
+    {
+        document.getElementById('now-artist').textContent = 'Radio status unavailable';
+    }
+}
+updateNowPlaying();
+setInterval(updateNowPlaying, 3000);
+</script>
 
 
 <div class="grid">
@@ -936,6 +1077,16 @@ Next Station ▶
 
 </div>
 
+<div class="card" id="now-playing">
+
+<h2>Now Playing</h2>
+<div id="now-station">Connecting...</div>
+<div id="now-artist">Waiting for stream metadata...</div>
+<div id="now-song"></div>
+<div id="now-bitrate"></div>
+
+</div>
+
 <div class="card">
       <center>
     <h2>⭐Favourite Stations</h2>
@@ -952,6 +1103,8 @@ Next Station ▶
     <input id="name" placeholder="Station Name">
 
     <input id="url" placeholder="Stream URL">
+
+    <input id="logo" placeholder="Logo URL (optional JPEG)">
 
     <button id="add" class="addBtn">
         + Add Favourite
@@ -988,6 +1141,11 @@ async function load()
                 <button class="delBtn" onclick="del(${idx})">
                     Delete
                 </button>
+
+                <input id="logo-${idx}" type="file" accept="image/jpeg" style="margin-top:8px">
+                <button class="addBtn" onclick="uploadLogo(${idx})">
+                    Upload JPEG Logo
+                </button>
             </div>
         `;
 
@@ -999,6 +1157,7 @@ async function add()
 {
     const name = document.getElementById('name').value;
     const url = document.getElementById('url').value;
+    const logo = document.getElementById('logo').value;
 
     const res = await fetch('/api/favourites',
     {
@@ -1010,7 +1169,8 @@ async function add()
         body:JSON.stringify(
         {
             name,
-            url
+            url,
+            logo
         })
     });
 
@@ -1023,6 +1183,7 @@ async function add()
 
     document.getElementById('name').value = '';
     document.getElementById('url').value = '';
+    document.getElementById('logo').value = '';
 
     load();
 }
@@ -1050,6 +1211,52 @@ async function play(idx)
         method:'POST'
     });
 }
+
+async function uploadLogo(idx)
+{
+    const fileInput = document.getElementById('logo-' + idx);
+    if (!fileInput.files.length)
+    {
+        alert('Choose a JPEG logo first.');
+        return;
+    }
+
+    const body = new FormData();
+    body.append('logo', fileInput.files[0]);
+    const res = await fetch('/api/favourites/logo?index=' + idx,
+    {
+        method: 'POST',
+        body
+    });
+
+    if (!res.ok)
+    {
+        alert(await res.text());
+        return;
+    }
+
+    alert('Logo uploaded. Play the station again to display it.');
+}
+
+async function updateNowPlaying()
+{
+    try
+    {
+        const res = await fetch('/api/now-playing');
+        const now = await res.json();
+        document.getElementById('now-station').textContent = now.station || 'Connecting...';
+        document.getElementById('now-artist').textContent = now.artist || 'Waiting for stream metadata...';
+        document.getElementById('now-song').textContent = now.song || '';
+        document.getElementById('now-bitrate').textContent = now.bitrate ? now.bitrate + ' kbps' : '';
+    }
+    catch (error)
+    {
+        document.getElementById('now-artist').textContent = 'Radio status unavailable';
+    }
+}
+
+updateNowPlaying();
+setInterval(updateNowPlaying, 3000);
 
 document.getElementById('add').addEventListener('click', add);
 

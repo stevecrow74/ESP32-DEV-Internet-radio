@@ -174,7 +174,7 @@ drawScrollingText(
     stationOffset
 );
 
-    drawStationLogo(currentStation);
+    drawStationLogo(currentStation, currentLogoUrl);
 
     // Now Playing
     tft.setTextSize(2);

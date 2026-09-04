@@ -10,6 +10,7 @@ static int current = 0;
 static RadioStation currentRadioStation = {DEFAULT_NAME, DEFAULT_URL};
 static String currentNameCache = DEFAULT_NAME;
 static String currentUrlCache = DEFAULT_URL;
+static String currentLogoCache;
 
 void stationInit()
 {
@@ -48,6 +49,7 @@ const RadioStation* stationCurrent()
         FavStation s = favsGet(current);
         currentNameCache = s.name;
         currentUrlCache = s.url;
+        currentLogoCache = s.logoUrl;
     }
 
     currentRadioStation.name = currentNameCache.c_str();
@@ -87,6 +89,7 @@ void stationConnectCurrent()
         return;
 
     currentStation = st->name;
+    currentLogoUrl = currentLogoCache;
     currentTitle = "";
     currentBitrate = "";
 
@@ -100,9 +103,10 @@ void stationConnectCurrent()
     
 }
 
-void stationPlayUrl(const char *name, const char *url)
+void stationPlayUrl(const char *name, const char *url, const char *logoUrl)
 {
     currentStation = name;
+    currentLogoUrl = logoUrl ? logoUrl : "";
     currentTitle = "";
     currentBitrate = "";
 

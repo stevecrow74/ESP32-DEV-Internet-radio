@@ -9,23 +9,23 @@
 3. Check top status bar for Wi-Fi and time.
 
 ## Controls
-### Left Encoder
-- Rotate: Volume up/down
-- Press: Mute/unmute
+### GPIO 1 Button
+- Short press: Next widget
+- Long press: Unused
 
-### Right Encoder
-- Rotate: Next/previous favourite station (normal widgets)
-- Press: Next widget
+### Touch Pads
+- GPIO 2: Previous station
+- GPIO 6: Next station
+- GPIO 4: Volume down
+- GPIO 5: Volume up
 
 Main station browsing uses favourites. Startup defaults to Rewind when present.
 
 ## Favourites Widget
-- Manual access only (not in auto-cycle).
-- Press right encoder button to move through widgets until Favourites appears.
+- Press GPIO 1 to move through widgets until Favourites appears.
 - In Favourites:
-  - Rotate: Move highlight
-  - Short press: Play selected favourite
-  - Long press (~5 sec): Delete selected favourite
+   - GPIO 2/GPIO 6: Move highlight
+   - After three seconds: Play the selected favourite
 
 ---
 
@@ -54,6 +54,7 @@ Main station browsing uses favourites. Startup defaults to Rewind when present.
 ### Configure Tides
 1. Open /tides
 2. Set location + coordinates + refresh + source URL
+3. The Tides widget shows all daily high/low events in High/Low, Time, and Height columns.
 3. Save
 
 ### Network Management

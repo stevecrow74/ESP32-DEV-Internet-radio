@@ -66,14 +66,14 @@ constexpr uint8_t FONT_HUGE   = 4;
 // Audio
 //==================================================
 
-constexpr uint8_t MAX_VOLUME     = 50;
+constexpr uint8_t MAX_VOLUME     = 21;
 constexpr uint8_t MIN_VOLUME     = 0;
 
 //==================================================
 // Widgets
 //==================================================
 
-constexpr uint8_t MAX_WIDGETS = 6;
+constexpr uint8_t MAX_WIDGETS = 7;
 
 //==================================================
 // ADS-B

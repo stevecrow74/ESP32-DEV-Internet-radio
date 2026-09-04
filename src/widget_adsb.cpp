@@ -35,6 +35,10 @@ static int aircraftCount = -1;
 static String adsbStatus = "Searching..";
 static unsigned long lastFetchMs = 0;
 static bool fetchInProgress = false;
+static TaskHandle_t adsbTaskHandle = nullptr;
+static volatile bool adsbRequestPending = false;
+static const uint32_t ADSB_REQUEST_TIMEOUT_MS = 5000;
+static const uint8_t ADSB_MAX_ATTEMPTS = 2;
 
 static const unsigned long ADSB_FETCH_MS = ADSB_UPDATE_MS;
 
@@ -122,6 +126,7 @@ static void fetchAdsbData()
     adsbStatus = "Updating...";
 
     HTTPClient http;
+    http.setTimeout(ADSB_REQUEST_TIMEOUT_MS);
     http.begin(feedUrl);
     int httpCode = http.GET();
 
@@ -222,9 +227,23 @@ void adsbWidgetInit()
 
 void adsbWidgetLoop()
 {
-    if (millis() - lastFetchMs >= ADSB_FETCH_MS)
+    if (!adsbRequestPending && millis() - lastFetchMs >= ADSB_FETCH_MS)
     {
-        fetchAdsbData();
+        lastFetchMs = millis();
+        adsbRequestPending = true;
+        xTaskCreatePinnedToCore([](void *) {
+            for (uint8_t attempt = 1; attempt <= ADSB_MAX_ATTEMPTS; ++attempt)
+            {
+                fetchAdsbData();
+                if (adsbStatus == "Updated" || adsbStatus == "No nearby aircraft")
+                    break;
+                if (attempt < ADSB_MAX_ATTEMPTS)
+                    vTaskDelay(pdMS_TO_TICKS(250));
+            }
+            adsbRequestPending = false;
+            adsbTaskHandle = nullptr;
+            vTaskDelete(nullptr);
+        }, "adsb", 8192, nullptr, 1, &adsbTaskHandle, 0);
     }
 }
 
@@ -235,7 +254,7 @@ void adsbWidgetDraw()
     tft.setTextColor(ST77XX_CYAN);
     tft.setTextSize(2);
     tft.setCursor(70, 110);
-    tft.print("ADS-B");
+    tft.print("Flight Radar");
 
     tft.setTextColor(ST77XX_WHITE);
     tft.setTextSize(1);
@@ -262,19 +281,22 @@ void adsbWidgetDraw()
 
     tft.setTextSize(2);
     tft.setCursor(10, 185);
+    tft.print ("Nearest ");
     tft.print(nearestAircraft.flight.length() ? nearestAircraft.flight : "UNKNOWN");
 
-    tft.setTextSize(1);
-    tft.setCursor(10, 210);
-    tft.print("Hex: ");
-    tft.print(nearestAircraft.hex);
 
-    tft.setCursor(10, 225);
+    tft.setCursor(10, 210);
     tft.print("Dist: ");
     tft.print(String(nearestAircraft.distanceKm, 1));
     tft.print(" km");
 
-    tft.setCursor(10, 240);
+    tft.setTextSize(1);
+    tft.setCursor(10, 230);
+    tft.print("Hex: ");
+    tft.print(nearestAircraft.hex);
+
+
+    tft.setCursor(10, 245);
     tft.print("Alt: ");
     if (!isnan(nearestAircraft.alt))
         tft.print(String(nearestAircraft.alt, 0));
@@ -282,7 +304,7 @@ void adsbWidgetDraw()
         tft.print("N/A");
     tft.print(" ft");
 
-    tft.setCursor(10, 255);
+    tft.setCursor(10, 260);
     tft.print("Spd: ");
     if (!isnan(nearestAircraft.speed))
         tft.print(String(nearestAircraft.speed, 0));
@@ -290,7 +312,7 @@ void adsbWidgetDraw()
         tft.print("N/A");
     tft.print(" kt");
 
-    tft.setCursor(10, 270);
+    tft.setCursor(10, 275);
     tft.print("Trk: ");
     if (!isnan(nearestAircraft.track))
         tft.print(String(nearestAircraft.track, 0));

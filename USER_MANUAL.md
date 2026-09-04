@@ -1,7 +1,7 @@
 # ESP32 Smart Radio V2 - User Manual
 
 ## 1. Overview
-ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls, audio streaming, and a built-in browser-based Web UI for management.
+ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, touch controls, audio streaming, and a built-in browser-based Web UI for management.
 
 Main features:
 - Internet radio streaming
@@ -12,30 +12,27 @@ Main features:
 - Network scan/connect, saved Wi-Fi credentials, and AP mode
 
 ## 2. Hardware Controls
-The device uses two rotary encoders.
+The current control layout uses one push button and four capacitive touch pads.
 
-### Encoder 1 (Volume/Mute)
-- Rotate: change volume (0 to 21)
-- Press: mute/unmute audio
+### GPIO 1 button
+- Short press: advance to the next widget
+- Long press: currently unused
 
-### Encoder 2 (Station/Widget/Favourites)
-Normal (most widgets):
-- Rotate: next/previous favourite station (main radio browsing now uses your favourites list)
-- Press: next widget (manual widget selection)
+### Touch pads
+- GPIO 2: previous station, or previous favourite on the Favourites widget
+- GPIO 6: next station, or next favourite on the Favourites widget
+- GPIO 4: volume down
+- GPIO 5: volume up
 
-When on Favourites widget:
-- Rotate: move selection in favourites list
-- Short press: play selected favourite
-- Long press (hold about 5 seconds): delete selected favourite
+When on the Favourites widget:
+- GPIO 2/GPIO 6: move the selection in the favourites list
+- After three seconds without another touch: play the selected favourite
 
 ## 3. Widget Behavior
-### Auto-cycle
-- Widgets auto-cycle every ~10 seconds.
-- Favourites widget is excluded from automatic cycle.
-- You can still access Favourites manually using widget button presses.
-
-### Manual hold
-- After manual widget selection, current widget is held for ~20 seconds before normal auto behavior resumes.
+### Widget selection
+- Widgets stay on screen until manually changed.
+- Press GPIO 1 to advance through Clock, ADS-B, Weather, Tides, Audio, Favourites, and System.
+- Favourites is part of the normal widget sequence.
 
 ## 4. Default Location and Time Settings
 Compile-time defaults:
@@ -112,7 +109,8 @@ Configure and save:
 - Source URL (default TideTime Galway page)
 
 Current behavior:
-- Tide widget fetches and parses high/low/trend data from the configured source URL.
+- Tide widget fetches the day's high and low events from the configured source URL.
+- The widget displays each event in three columns: High/Low, Time, and Height.
 - Default parser is built for the TideTime Galway page structure.
 
 Saved to:

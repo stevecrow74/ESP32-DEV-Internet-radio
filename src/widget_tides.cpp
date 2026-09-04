@@ -17,6 +17,10 @@ static char tideLevel[16];
 static char tideNextHigh[8];
 static char tideNextLow[8];
 static unsigned long lastFetchMs = 0;
+static TaskHandle_t tidesTaskHandle = nullptr;
+static volatile bool tidesRequestPending = false;
+static const uint32_t TIDES_REQUEST_TIMEOUT_MS = 5000;
+static const uint8_t TIDES_MAX_ATTEMPTS = 2;
 
 static void setHttpStatus(int code)
 {
@@ -253,6 +257,10 @@ struct TideEvent
 	String heightM;
 };
 
+static const uint8_t TIDES_MAX_EVENTS = 12;
+static TideEvent tideEvents[TIDES_MAX_EVENTS];
+static int tideEventCount = 0;
+
 static bool parseTideEvents(const String &html, TideEvent *events, int maxEvents, int &count)
 {
 	count = 0;
@@ -352,6 +360,9 @@ static bool parseTideTimePage(const String &html)
 	TideEvent events[12];
 	int eventCount = 0;
 	parseTideEvents(html, events, 12, eventCount);
+	tideEventCount = eventCount;
+	for (int i = 0; i < tideEventCount; i++)
+		tideEvents[i] = events[i];
 
 	int highInMins = parseCountdownMinutes(nextHighIn);
 	int lowInMins = parseCountdownMinutes(nextLowIn);
@@ -470,7 +481,7 @@ static bool fetchTextUrl(const String &url, String &payload, int &httpCode)
 {
 	HTTPClient http;
 	http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-	http.setTimeout(15000);
+	http.setTimeout(TIDES_REQUEST_TIMEOUT_MS);
 	http.setReuse(false);
 	http.setUserAgent("Mozilla/5.0 (ESP32-Radio; Tides)");
 	http.addHeader("Accept-Encoding", "identity");
@@ -603,6 +614,14 @@ static bool parseRssDescription(const String &rss)
 
 	if (n == 0)
 		return false;
+
+	tideEventCount = n;
+	for (int i = 0; i < tideEventCount; i++)
+	{
+		tideEvents[i].state = events[i].isHigh ? "high" : "low";
+		tideEvents[i].minutesOfDay = events[i].minutes;
+		tideEvents[i].heightM = events[i].height;
+	}
 
 	time_t nowTs = time(nullptr);
 	struct tm tmNow;
@@ -794,16 +813,29 @@ void tidesWidgetInit()
 	setText(tideLevel, sizeof(tideLevel), "--");
 	setText(tideNextHigh, sizeof(tideNextHigh), "--:--");
 	setText(tideNextLow, sizeof(tideNextLow), "--:--");
+	tideEventCount = 0;
 	lastFetchMs = 0;
 }
 
 void tidesWidgetLoop()
 {
 	unsigned long now = millis();
-	if (lastFetchMs == 0 || (now - lastFetchMs >= tidesRefreshMs()))
+	if (!tidesRequestPending && (lastFetchMs == 0 || (now - lastFetchMs >= tidesRefreshMs())))
 	{
-		fetchTides();
 		lastFetchMs = now;
+		tidesRequestPending = true;
+		xTaskCreatePinnedToCore([](void *) {
+			for (uint8_t attempt = 1; attempt <= TIDES_MAX_ATTEMPTS; ++attempt)
+			{
+				if (fetchTides())
+					break;
+				if (attempt < TIDES_MAX_ATTEMPTS)
+					vTaskDelay(pdMS_TO_TICKS(250));
+			}
+			tidesRequestPending = false;
+			tidesTaskHandle = nullptr;
+			vTaskDelete(nullptr);
+		}, "tides", 12288, nullptr, 1, &tidesTaskHandle, 0);
 	}
 }
 
@@ -817,21 +849,39 @@ void tidesWidgetDraw()
 	tft.print("TIDES");
 
 	tft.setTextColor(ST77XX_WHITE);
-	tft.setTextSize(1);
+	tft.setTextSize(2);
 	tft.setCursor(10, 135);
 	tft.print(tidesLocation());
 
-	tft.setCursor(10, 147);
-	tft.print(tideStatus);
 
-	drawLabelValue(160, "Trend", tideTrend);
-	drawLabelValue(185, "Level", tideLevel);
-	drawLabelValue(210, "High", tideNextHigh);
-	drawLabelValue(235, "Low", tideNextLow);
 
-	tft.setTextSize(1);
-	tft.setCursor(10, 265);
-	tft.print("Update ");
-	tft.print(tidesRefreshMs() / 60000UL);
-	tft.print(" min");
+	tft.setTextColor(ST77XX_CYAN);
+	tft.setCursor(10, 160);
+	tft.print("Tide");
+	tft.setCursor(90, 160);
+	tft.print("Time");
+	tft.setCursor(170, 160);
+	tft.print("Height");
+
+	tft.setTextColor(ST77XX_WHITE);
+	for (int i = 0; i < tideEventCount; i++)
+	{
+		int y = 178 + (i * 18);
+		if (y > 315)
+			break;
+
+		String state = tideEvents[i].state;
+		state.toLowerCase();
+		String label = state.indexOf("high") >= 0 ? "High" : "Low";
+		String height = tideEvents[i].heightM;
+		if (height.length() > 0 && !height.endsWith("m"))
+			height += "m";
+
+		tft.setCursor(10, y);
+		tft.print(label);
+		tft.setCursor(90, y);
+		tft.print(formatMinutes24(tideEvents[i].minutesOfDay));
+		tft.setCursor(170, y);
+		tft.print(height.length() ? height : "--");
+	}
 }

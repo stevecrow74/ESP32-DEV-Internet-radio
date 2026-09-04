@@ -9,11 +9,13 @@
 enum WidgetID
 {
     WIDGET_CLOCK = 0,
-    WIDGET_ADSB,
-    WIDGET_WEATHER,
-    WIDGET_TIDES,
+    WIDGET_SYSTEM,
     WIDGET_AUDIO,
-    WIDGET_SYSTEM
+    WIDGET_FAVORITES,
+    WIDGET_TIDES,
+    WIDGET_WEATHER,
+    WIDGET_ADSB,
+    
 };
 
 void widgetInit();
@@ -26,8 +28,11 @@ void widgetDraw();
 
 extern WidgetID currentWidget;
 
-// Notify widget manager of user activity (resets inactivity timer)
+// Retained for input compatibility; widgets are manually selected only.
 void widgetUserActivity();
 
-// Hold the currently selected widget for a longer period after manual selection
+// Retained for input compatibility; widgets are manually selected only.
 void widgetHoldSelected();
+
+// Retained for input compatibility; widgets are manually selected only.
+void widgetHoldSelectedFor(unsigned long durationMs);

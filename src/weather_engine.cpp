@@ -14,6 +14,11 @@ static String wind = "--";
 static int code = -1;
 
 static unsigned long lastUpdate = 0;
+static TaskHandle_t weatherTaskHandle = nullptr;
+static volatile bool weatherRequestPending = false;
+
+static const uint32_t WEATHER_REQUEST_TIMEOUT_MS = 5000;
+static const uint8_t WEATHER_MAX_ATTEMPTS = 2;
 
 const unsigned long WEATHER_UPDATE_INTERVAL =
     15UL * 60UL * 1000UL;
@@ -25,14 +30,22 @@ bool weatherInit()
 
 void weatherLoop()
 {
-    if (millis() - lastUpdate >= WEATHER_UPDATE_INTERVAL)
+    if (!weatherRequestPending && millis() - lastUpdate >= WEATHER_UPDATE_INTERVAL)
     {
         lastUpdate = millis();
-
-        Serial.println();
-        Serial.println("Updating weather...");
-
-        weatherUpdate();
+        weatherRequestPending = true;
+        xTaskCreatePinnedToCore([](void *) {
+            for (uint8_t attempt = 1; attempt <= WEATHER_MAX_ATTEMPTS; ++attempt)
+            {
+                if (weatherUpdate())
+                    break;
+                if (attempt < WEATHER_MAX_ATTEMPTS)
+                    vTaskDelay(pdMS_TO_TICKS(250));
+            }
+            weatherRequestPending = false;
+            weatherTaskHandle = nullptr;
+            vTaskDelete(nullptr);
+        }, "weather", 8192, nullptr, 1, &weatherTaskHandle, 0);
     }
 }
 
@@ -57,6 +70,7 @@ bool weatherUpdate()
     Serial.println(url);
 
     http.begin(url);
+    http.setTimeout(WEATHER_REQUEST_TIMEOUT_MS);
 
     int httpCode = http.GET();
 

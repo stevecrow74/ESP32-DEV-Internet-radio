@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "config.h"
 #include "display.h"
 #include "widget_favourites.h"
 #include "favourites.h"
@@ -36,7 +37,7 @@ static void drawList()
     int count = favsCount();
 
     int y = 140;
-    int show = 6;
+    int show = (SCREEN_HEIGHT - y) / 18;
 
     if (selected < offset) offset = selected;
     if (selected >= offset + show) offset = selected - show + 1;
@@ -90,7 +91,7 @@ void favWidgetSelect()
     if (count == 0) return;
 
     FavStation s = favsGet(selected);
-    stationPlayUrl(s.name.c_str(), s.url.c_str());
+    stationPlayUrl(s.name.c_str(), s.url.c_str(), s.logoUrl.c_str());
 }
 
 void favWidgetDeleteSelected()

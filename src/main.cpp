@@ -10,6 +10,7 @@
 #include "weather_engine.h"
 #include "webui.h"
 #include <SPIFFS.h>
+#include <esp_task_wdt.h>
 
 void setup()
 {
@@ -55,17 +56,21 @@ void setup()
     Serial.println("[BOOT] webui ready");
 
     weatherInit();
-    weatherUpdate();
     Serial.println("[BOOT] weather ready");
 
     delay(5000);
     widgetDraw();
+
+    // Start watchdog protection after the intentionally blocking boot sequence.
+    esp_task_wdt_add(nullptr);
 
     Serial.println("System Ready");
 }
 
 void loop()
 {
+    esp_task_wdt_reset();
+
     encodersLoop();
 
     displayLoop();

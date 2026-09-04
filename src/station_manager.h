@@ -13,4 +13,4 @@ void stationNext();
 void stationPrevious();
 
 void stationConnectCurrent();
-void stationPlayUrl(const char *name, const char *url);
+void stationPlayUrl(const char *name, const char *url, const char *logoUrl = nullptr);
