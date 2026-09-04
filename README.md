@@ -1,9 +1,25 @@
 # ESP32 Smart Radio V2 - User Manual
 ![ESP32 interner radio](img_3597.jpg)
+
+I've sone a major overhaul of this project!
+
+I've removed the rotary encoders altogether and using capacitive touch
+to control stations and volume.
+
+I've also replace the ESP32-D with an ESP32-S3-N16R8 board. 
+ 
+I'll put changes in brackets beside original functions
+
+
 # Hardware
 This project uses:
+<<<<<<< HEAD
 -ESP32 Dev board
 - TFT display and capacitive touch controls
+=======
+-ESP32 Dev board (ESP32-S3-N16R8)
+- 2 rotary encoders (4 wires for capasitive touch)
+>>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
 - GMT020-02 ST7789 2" LCD
 - GY-PCM5102 I2S Stereo Board
 
@@ -14,7 +30,11 @@ This build uses my own local settings, these can be changed in the Webui.
 
 
 ## 1. Overview
+<<<<<<< HEAD
 ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, touch controls, audio streaming, and a built-in browser-based Web UI for management.
+=======
+ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls (touch pads), audio streaming, and a built-in browser-based Web UI for management.
+>>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
 
 Main features:
 - Internet radio streaming
@@ -25,6 +45,7 @@ Main features:
 - Network scan/connect, saved Wi-Fi credentials, and AP mode
 
 ## 2. Hardware Controls
+<<<<<<< HEAD
 The current control layout uses one push button and four capacitive touch pads.
 
 ### GPIO 1 button
@@ -40,6 +61,28 @@ The current control layout uses one push button and four capacitive touch pads.
 When on the Favourites widget:
 - GPIO 2/GPIO 6: move the selection through the favourites list
 - After three seconds without another touch: play the selected favourite
+=======
+The device uses two rotary encoders.(4 wires)
+
+### Encoder 1 (Volume/Mute) (wires 2&3)
+- Rotate(tap): change volume (0 to 21)
+- Press: mute/unmute audio(long press button)
+- Long press for system widget
+- 
+### Encoder 2 (Station/Widget/Favourites) (wires 1&2)
+Normal (most widgets):
+- Rotate (tap): next/previous favourite station (main radio browsing now uses your favourites list)
+- Press: next widget (manual widget selection)
+
+### Button
+- short press: changes between widgets
+- long press: mute/unmute
+
+When on Favourites widget:
+- Rotate: move selection in favourites list
+- Short press: play selected favourite
+- Long press (hold about 5 seconds): delete selected favourite
+>>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
 
 ## 3. Widget Behavior
 ### Widget selection
