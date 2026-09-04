@@ -1,25 +1,23 @@
 # ESP32 Smart Radio V2 - User Manual
 ![ESP32 interner radio](img_3597.jpg)
 
-I've sone a major overhaul of this project!
+I've done a major overhaul of this project!
 
 I've removed the rotary encoders altogether and using capacitive touch
 to control stations and volume.
 
 I've also replace the ESP32-D with an ESP32-S3-N16R8 board. 
  
-I'll put changes in brackets beside original functions
 
 
 # Hardware
 This project uses:
-<<<<<<< HEAD
+
 -ESP32 Dev board
 - TFT display and capacitive touch controls
 =======
--ESP32 Dev board (ESP32-S3-N16R8)
-- 2 rotary encoders (4 wires for capasitive touch)
->>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
+- ESP32-S3-N16R8
+- 4 wires for capasitive touch
 - GMT020-02 ST7789 2" LCD
 - GY-PCM5102 I2S Stereo Board
 
@@ -30,11 +28,7 @@ This build uses my own local settings, these can be changed in the Webui.
 
 
 ## 1. Overview
-<<<<<<< HEAD
 ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, touch controls, audio streaming, and a built-in browser-based Web UI for management.
-=======
-ESP32 Smart Radio V2 is a Wi-Fi internet radio with a TFT display, rotary encoder controls (touch pads), audio streaming, and a built-in browser-based Web UI for management.
->>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
 
 Main features:
 - Internet radio streaming
@@ -45,7 +39,6 @@ Main features:
 - Network scan/connect, saved Wi-Fi credentials, and AP mode
 
 ## 2. Hardware Controls
-<<<<<<< HEAD
 The current control layout uses one push button and four capacitive touch pads.
 
 ### GPIO 1 button
@@ -64,33 +57,26 @@ When on the Favourites widget:
 =======
 The device uses two rotary encoders.(4 wires)
 
-### Encoder 1 (Volume/Mute) (wires 2&3)
+### Pad 1 & 2 (Volume/Mute) (wires 2&3)
 - Rotate(tap): change volume (0 to 21)
 - Press: mute/unmute audio(long press button)
-- Long press for system widget
-- 
-### Encoder 2 (Station/Widget/Favourites) (wires 1&2)
+
+### Pad 3 & 4 (Station/Widget/Favourites) (wires 1&2)
 Normal (most widgets):
-- Rotate (tap): next/previous favourite station (main radio browsing now uses your favourites list)
-- Press: next widget (manual widget selection)
+- next/previous favourite station (main radio browsing now uses your favourites list)
+
 
 ### Button
 - short press: changes between widgets
-- long press: mute/unmute
+- long press: Not Programmed
 
-When on Favourites widget:
-- Rotate: move selection in favourites list
-- Short press: play selected favourite
-- Long press (hold about 5 seconds): delete selected favourite
->>>>>>> 018fc194380e48be0a3c04ad74b20650b19fc284
 
 ## 3. Widget Behavior
 ### Widget selection
-- Press GPIO 1 to advance through Clock, ADS-B, Weather, Tides, Audio, Favourites, and System.
-- Favourites is part of the normal widget sequence.
+- Press Button to advance through Clock, ADS-B, Weather, Tides, Audio, Favourites, and System.
 
 ### Manual hold
-- After manual widget selection, current widget is held for 10 seconds before normal auto behavior resumes.
+- After manual widget selection, current widget is held.
 
 ## 4. Default Location and Time Settings
 Compile-time defaults:
@@ -100,6 +86,7 @@ Compile-time defaults:
 - Tide location label: Galway
 - Tide source URL: https://www.tidetime.org/europe/ireland/galway.htm
 - Timezone: Irish time with DST (GMT0IST,M3.5.0/1,M10.5.0)
+- All can be configured in include/config.h
 
 Notes:
 - ADS-B and Tides values can be changed in Web UI and saved to SPIFFS.
@@ -120,8 +107,8 @@ If no saved Wi-Fi is available, WiFiManager may open a captive portal depending 
 
 ### Startup station behavior
 - Main radio station browsing is sourced from favourites.
-- Default startup station is Rewind when present in favourites.
-- If favourites are empty, the system falls back to Rewind URL so playback still works.
+- Default startup station is Radio X when present in favourites.
+- If favourites are empty, the system falls back to Radio X URL so playback still works.
 
 ## 6. Web UI
 Open your radio IP in a browser (shown in serial logs and status bar when connected).
