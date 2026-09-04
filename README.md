@@ -15,7 +15,6 @@ This project uses:
 
 -ESP32 Dev board
 - TFT display and capacitive touch controls
-=======
 - ESP32-S3-N16R8
 - 4 wires for capasitive touch
 - GMT020-02 ST7789 2" LCD
